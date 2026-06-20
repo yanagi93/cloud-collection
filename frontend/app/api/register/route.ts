@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 
+const backendURL = process.env.BACKEND_URL ?? "http://localhost:8080";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
     const response = await fetch(
-      "http://localhost:8080/auth/register",
+      `${backendURL}/auth/register`,
       {
         method: "POST",
         headers: {
@@ -21,7 +23,7 @@ export async function POST(request: Request) {
       data,
       { status: response.status }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: "Server Error" },
       { status: 500 }

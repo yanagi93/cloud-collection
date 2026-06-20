@@ -83,7 +83,7 @@ export default function RegisterPage() {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/auth/register",
+        "/api/register",
         {
           method: "POST",
           headers: {
@@ -113,7 +113,7 @@ export default function RegisterPage() {
       // 登録成功後
 
       const loginResponse = await fetch(
-        "http://localhost:8080/auth/login",
+        "/api/login",
         {
           method: "POST",
           headers: {
