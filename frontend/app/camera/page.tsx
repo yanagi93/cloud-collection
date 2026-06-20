@@ -169,12 +169,14 @@ export default function CameraPage() {
                                     📸 撮影する
                                 </Button>
 
-                                <label
-                                    htmlFor="image-upload"
-                                    className="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-green-500 text-white font-bold text-base cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black hover:-translate-y-1 transition-transform active:translate-y-0 active:shadow-none"
+                                <Button
+                                    className="bg-green-400 text-black font-bold"
+                                    onClick={() =>
+                                        document.getElementById("image-upload")?.click()
+                                    }
                                 >
                                     🖼️ 画像を選択
-                                </label>
+                                </Button>
                                 <input
                                     id="image-upload"
                                     type="file"
