@@ -203,7 +203,7 @@ export default function CloudGlobe({ photos }: Props) {
                                 } as AnchorStyle
                             }
                         >
-                            <div className="h-14 w-full overflow-hidden border-2 border-black bg-sky-100">
+                            <div className="aspect-square w-full overflow-hidden border-2 border-black bg-sky-100">
                                 <img
                                     src={marker.imageUrl}
                                     alt="雲の写真"
@@ -226,7 +226,7 @@ export default function CloudGlobe({ photos }: Props) {
             {selectedPhoto ? (
                 <div className="mt-5 w-full max-w-sm rounded border-2 border-black bg-white p-4 shadow-[6px_6px_0px_#000]">
                     <div className="mb-4 border-2 border-black bg-white p-3 pb-8 shadow-[5px_5px_0px_#000]">
-                        <div className="h-40 w-full overflow-hidden border-2 border-black bg-sky-100">
+                        <div className="mx-auto aspect-square w-full max-w-72 overflow-hidden border-2 border-black bg-sky-100">
                             <img
                                 src={selectedPhoto.imageUrl}
                                 alt="選択した対戦相手の雲"
