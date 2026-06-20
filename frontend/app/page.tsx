@@ -14,9 +14,9 @@ export default function Home() {
       <div className="relative">
         
         <Image
-          src="/images/title.jpg"
+          src="/images/new-title.png"
           alt="Pre Cloud Collection"
-          width={1300}
+          width={1000}
           height={700}
           priority
         />
