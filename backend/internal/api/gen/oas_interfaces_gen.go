@@ -5,6 +5,10 @@ type CreateAnimalRes interface {
 	createAnimalRes()
 }
 
+type CreateBattleRes interface {
+	createBattleRes()
+}
+
 type DeleteAnimalRes interface {
 	deleteAnimalRes()
 }

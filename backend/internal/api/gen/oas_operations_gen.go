@@ -7,6 +7,7 @@ type OperationName = string
 
 const (
 	CreateAnimalOperation        OperationName = "CreateAnimal"
+	CreateBattleOperation        OperationName = "CreateBattle"
 	DeleteAnimalOperation        OperationName = "DeleteAnimal"
 	DeleteCloudPhotoOperation    OperationName = "DeleteCloudPhoto"
 	GetAnimalOperation           OperationName = "GetAnimal"

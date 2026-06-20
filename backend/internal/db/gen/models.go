@@ -67,6 +67,10 @@ type Animal struct {
 	CompositeImageUrl string             `db:"composite_image_url" json:"composite_image_url"`
 	Confidence        float64            `db:"confidence" json:"confidence"`
 	Description       pgtype.Text        `db:"description" json:"description"`
+	Hp                int32              `db:"hp" json:"hp"`
+	Attack            int32              `db:"attack" json:"attack"`
+	Evasion           int32              `db:"evasion" json:"evasion"`
+	Defense           int32              `db:"defense" json:"defense"`
 	CapturedAt        pgtype.Timestamptz `db:"captured_at" json:"captured_at"`
 	Latitude          pgtype.Float8      `db:"latitude" json:"latitude"`
 	Longitude         pgtype.Float8      `db:"longitude" json:"longitude"`

@@ -38,6 +38,10 @@ type CreateAnimalInput struct {
 	UseSuggestedAnimal bool
 	Species            string
 	SpeciesSet         bool
+	Hp                 int32
+	Attack             int32
+	Evasion            int32
+	Defense            int32
 }
 
 type UpdateAnimalInput struct {
@@ -91,6 +95,10 @@ func (s *AnimalService) Create(ctx context.Context, input CreateAnimalInput) (db
 	animal, err := s.animals.CreateFromCompletedJob(ctx, dbgen.CreateAnimalFromCompletedJobParams{
 		Name:    name,
 		Species: species,
+		Hp:      input.Hp,
+		Attack:  input.Attack,
+		Evasion: input.Evasion,
+		Defense: input.Defense,
 		PhotoID: input.PhotoID,
 		UserID:  input.UserID,
 	})

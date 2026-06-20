@@ -16,6 +16,18 @@ type Handler interface {
 	//
 	// POST /animals
 	CreateAnimal(ctx context.Context, req *CreateAnimalRequest) (CreateAnimalRes, error)
+	// CreateBattle implements createBattle operation.
+	//
+	// Challenger_id と defender_id
+	// で指定したコレクション動物同士のバトルを実行し、
+	// 初期ステータス、勝者、ターンごとの行動ログを返す。
+	// バトルは完全ターン制で自動実行され、各ターンに両者が attack を行う。
+	// 攻撃が命中した場合、攻撃側の attack から防御側の defense を引いた値だけ
+	// HP を減らす。 防御側の evasion は回避率（%）として扱い、命中率は
+	// `100 - evasion` で判定する。.
+	//
+	// POST /battles
+	CreateBattle(ctx context.Context, req *CreateBattleRequest) (CreateBattleRes, error)
 	// DeleteAnimal implements deleteAnimal operation.
 	//
 	// コレクションから削除.
