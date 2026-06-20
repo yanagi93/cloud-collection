@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Button from "@/component/Button";
+import React from 'react';
+import { Button } from 'pixel-retroui';
 
 export default function Home() {
   const router = useRouter();
@@ -23,18 +24,15 @@ export default function Home() {
         {/* ゲームスタート → ログイン */}
         <div className="absolute bottom-[85px] left-1/2 -translate-x-1/2">
           <Button
-            text="ゲームスタート"
             color="blue"
             onClick={() => router.push("/login")}
           />
         </div>
         {/* ゲームスタート → 新規登録 */}
         <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2">
-          <Button
-            text="新規登録"
-            color="yellow"
-            onClick={() => router.push("/register")}
-          />
+          <Button onClick={() => router.push("/register")}>
+            新規登録
+          </Button>
         </div>
       </div>
     </main>
