@@ -42,10 +42,12 @@ func run() error {
 
 	queries := dbgen.New(pool)
 	users := repository.NewUserRepository(queries)
+	cloudPhotos := repository.NewCloudPhotoRepository(pool, queries)
 	auth := service.NewAuthService(users, cfg.JWTSecret, cfg.JWTExpiresIn)
+	cloudPhotoService := service.NewCloudPhotoService(cloudPhotos)
 
 	apiServer, err := gen.NewServer(
-		handler.New(auth),
+		handler.New(auth, cloudPhotoService),
 		middleware.NewSecurityHandler(auth),
 		gen.WithErrorHandler(handler.ErrorHandler),
 	)

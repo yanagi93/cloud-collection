@@ -11,11 +11,15 @@ import (
 
 type Handler struct {
 	gen.UnimplementedHandler
-	auth *service.AuthService
+	auth        *service.AuthService
+	cloudPhotos *service.CloudPhotoService
 }
 
-func New(auth *service.AuthService) *Handler {
-	return &Handler{auth: auth}
+func New(auth *service.AuthService, cloudPhotos *service.CloudPhotoService) *Handler {
+	return &Handler{
+		auth:        auth,
+		cloudPhotos: cloudPhotos,
+	}
 }
 
 func (h *Handler) RegisterUser(ctx context.Context, req *gen.RegisterRequest) (gen.RegisterUserRes, error) {
