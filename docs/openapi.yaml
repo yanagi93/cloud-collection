@@ -1,0 +1,819 @@
+openapi: 3.1.0
+info:
+  title: Cloud Animal Collection API
+  version: 0.1.0
+  description: |
+    ユーザーが撮影した雲の写真をアップロードし、AI が雲の形から連想される動物を検出して
+    落書き（オーバーレイ）を生成する。ユーザーが動物に名前をつけてコレクションに登録する
+    バックエンド API。
+
+    ## 典型的なフロー
+
+    1. `POST /cloud-photos` で雲の写真をアップロードする
+    2. `POST /cloud-photos/{photoId}/process` で AI 解析（動物連想 + 落書き生成）を開始する
+    3. `GET /cloud-photos/{photoId}/process` で処理完了をポーリングする
+    4. 結果を確認し、`POST /animals` で名前をつけてコレクションに登録する
+    5. `GET /animals` でコレクション一覧を閲覧する
+
+servers:
+  - url: http://localhost:8080
+    description: ローカル開発環境
+  - url: https://api.example.com
+    description: 本番環境
+
+tags:
+  - name: Auth
+    description: ユーザー認証
+  - name: CloudPhotos
+    description: 雲の写真のアップロードと管理
+  - name: Processing
+    description: AI による動物連想・落書き生成
+  - name: Animals
+    description: 名前付き動物コレクション
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      operationId: registerUser
+      summary: ユーザー登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: メールアドレスが既に登録済み
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: loginUser
+      summary: ログイン
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /me:
+    get:
+      tags: [Auth]
+      operationId: getCurrentUser
+      summary: ログイン中のユーザー情報を取得
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: ユーザー情報
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cloud-photos:
+    get:
+      tags: [CloudPhotos]
+      operationId: listCloudPhotos
+      summary: 雲の写真一覧を取得
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: status
+          in: query
+          description: 処理状態でフィルタ
+          schema:
+            $ref: '#/components/schemas/ProcessingStatus'
+      responses:
+        '200':
+          description: 写真一覧
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudPhotoList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [CloudPhotos]
+      operationId: uploadCloudPhoto
+      summary: 雲の写真をアップロード
+      description: |
+        ユーザーが撮影した雲の写真をアップロードする。
+        `auto_process=true` の場合、アップロード後に自動で AI 解析を開始する。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [image]
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: 雲の写真（JPEG / PNG / HEIC）
+                auto_process:
+                  type: boolean
+                  default: true
+                  description: アップロード後に AI 解析を自動開始するか
+                captured_at:
+                  type: string
+                  format: date-time
+                  description: 撮影日時（クライアント側の EXIF 等）
+                latitude:
+                  type: number
+                  format: double
+                  description: 撮影地点の緯度
+                longitude:
+                  type: number
+                  format: double
+                  description: 撮影地点の経度
+      responses:
+        '201':
+          description: アップロード成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudPhoto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          description: ファイルサイズ超過
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cloud-photos/{photoId}:
+    parameters:
+      - $ref: '#/components/parameters/PhotoId'
+
+    get:
+      tags: [CloudPhotos]
+      operationId: getCloudPhoto
+      summary: 雲の写真の詳細を取得
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 写真詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloudPhoto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [CloudPhotos]
+      operationId: deleteCloudPhoto
+      summary: 雲の写真を削除
+      description: コレクション登録済みの動物に紐づく写真は削除できない
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: 削除成功
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: コレクション登録済みのため削除不可
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /cloud-photos/{photoId}/process:
+    parameters:
+      - $ref: '#/components/parameters/PhotoId'
+
+    post:
+      tags: [Processing]
+      operationId: startProcessing
+      summary: AI 解析を開始
+      description: |
+        雲の写真から動物を連想し、落書き（オーバーレイ画像）を生成する非同期ジョブを開始する。
+        既に処理中または完了済みの場合は 409 を返す。
+      security:
+        - bearerAuth: []
+      responses:
+        '202':
+          description: 処理ジョブを受け付けた
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingJob'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 既に処理中または完了済み
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags: [Processing]
+      operationId: getProcessingResult
+      summary: AI 解析の状態・結果を取得
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 処理状態と結果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingJob'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /animals:
+    get:
+      tags: [Animals]
+      operationId: listAnimals
+      summary: コレクション一覧を取得
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: sort
+          in: query
+          description: ソート順
+          schema:
+            type: string
+            enum: [created_at_desc, created_at_asc, name_asc, name_desc]
+            default: created_at_desc
+        - name: q
+          in: query
+          description: 名前・動物種別での部分一致検索
+          schema:
+            type: string
+      responses:
+        '200':
+          description: コレクション一覧
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnimalList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Animals]
+      operationId: createAnimal
+      summary: 動物をコレクションに登録
+      description: |
+        AI 解析が完了した雲の写真から、ユーザーが名前をつけてコレクションに登録する。
+        同じ写真からは 1 体のみ登録可能。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnimalRequest'
+      responses:
+        '201':
+          description: コレクション登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 処理未完了、または既に登録済み
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /animals/{animalId}:
+    parameters:
+      - $ref: '#/components/parameters/AnimalId'
+
+    get:
+      tags: [Animals]
+      operationId: getAnimal
+      summary: コレクションの動物詳細を取得
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 動物詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Animals]
+      operationId: updateAnimal
+      summary: コレクションの動物情報を更新
+      description: 主に名前の変更に使用する
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnimalRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Animals]
+      operationId: deleteAnimal
+      summary: コレクションから削除
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: 削除成功
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: ログインまたは登録で取得したアクセストークン
+
+  parameters:
+    PhotoId:
+      name: photoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: 雲の写真 ID
+
+    AnimalId:
+      name: animalId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: コレクション動物 ID
+
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    BadRequest:
+      description: リクエストが不正
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: 認証が必要、またはトークンが無効
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: 入力内容に誤りがあります
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    User:
+      type: object
+      required: [id, email, display_name, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        created_at:
+          type: string
+          format: date-time
+
+    RegisterRequest:
+      type: object
+      required: [email, password, display_name]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 50
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    AuthResponse:
+      type: object
+      required: [access_token, token_type, expires_in, user]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          enum: [Bearer]
+        expires_in:
+          type: integer
+          description: トークン有効期限（秒）
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    ProcessingStatus:
+      type: string
+      enum:
+        - pending
+        - processing
+        - completed
+        - failed
+      description: |
+        - pending: アップロード済み、未処理
+        - processing: AI 解析中
+        - completed: 解析・落書き生成完了
+        - failed: 解析失敗
+
+    CloudPhoto:
+      type: object
+      required:
+        - id
+        - user_id
+        - original_image_url
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        original_image_url:
+          type: string
+          format: uri
+          description: オリジナルの雲の写真 URL
+        status:
+          $ref: '#/components/schemas/ProcessingStatus'
+        captured_at:
+          type: string
+          format: date-time
+          nullable: true
+        location:
+          $ref: '#/components/schemas/GeoLocation'
+        processing:
+          $ref: '#/components/schemas/ProcessingJob'
+          description: 最新の処理ジョブ（存在する場合）
+        animal_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: コレクション登録済みの場合の動物 ID
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CloudPhotoList:
+      type: object
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CloudPhoto'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    GeoLocation:
+      type: object
+      nullable: true
+      required: [latitude, longitude]
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+
+    ProcessingJob:
+      type: object
+      required:
+        - id
+        - photo_id
+        - status
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        photo_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/ProcessingStatus'
+        result:
+          $ref: '#/components/schemas/ProcessingResult'
+          description: status が completed のときのみ存在
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+              example: AI_INFERENCE_FAILED
+            message:
+              type: string
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    ProcessingResult:
+      type: object
+      required:
+        - suggested_animal
+        - confidence
+        - doodle_image_url
+        - composite_image_url
+      properties:
+        suggested_animal:
+          type: string
+          description: "AI が連想した動物名（例: うさぎ、いぬ）"
+          example: うさぎ
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: 連想の確信度（0〜1）
+          example: 0.87
+        description:
+          type: string
+          description: AI による雲の形の説明
+          example: 右側に耳のような突起があり、全体がうさぎの横顔に見える
+        doodle_image_url:
+          type: string
+          format: uri
+          description: 生成された落書きレイヤー画像 URL（透過 PNG）
+        composite_image_url:
+          type: string
+          format: uri
+          description: オリジナル写真に落書きを合成した画像 URL
+
+    CreateAnimalRequest:
+      type: object
+      required: [photo_id, name]
+      properties:
+        photo_id:
+          type: string
+          format: uuid
+          description: AI 解析完了済みの雲の写真 ID
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+          description: ユーザーがつける名前
+          example: もこもこうさぎ
+        use_suggested_animal:
+          type: boolean
+          default: true
+          description: AI の連想動物名を species として採用するか
+        species:
+          type: string
+          maxLength: 30
+          description: use_suggested_animal=false の場合に手動指定する動物種別
+
+    UpdateAnimalRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        species:
+          type: string
+          maxLength: 30
+
+    Animal:
+      type: object
+      required:
+        - id
+        - user_id
+        - photo_id
+        - name
+        - species
+        - composite_image_url
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        photo_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: ユーザーがつけた名前
+          example: もこもこうさぎ
+        species:
+          type: string
+          description: 連想された動物種別
+          example: うさぎ
+        original_image_url:
+          type: string
+          format: uri
+        doodle_image_url:
+          type: string
+          format: uri
+        composite_image_url:
+          type: string
+          format: uri
+          description: コレクション表示用の合成画像
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        description:
+          type: string
+          description: AI による雲の形の説明
+        captured_at:
+          type: string
+          format: date-time
+          nullable: true
+        location:
+          $ref: '#/components/schemas/GeoLocation'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AnimalList:
+      type: object
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Animal'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      required: [page, page_size, total_items, total_pages]
+      properties:
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
