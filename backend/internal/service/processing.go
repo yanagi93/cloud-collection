@@ -230,18 +230,22 @@ func (p *NanoBananaProcessor) Process(ctx context.Context, input ImageProcessing
 		return ImageProcessingOutput{}, errors.New("Nano Banana 2 API key is not configured")
 	}
 
-	metadata, err := p.generate(ctx, input, metadataPrompt)
-	if err != nil {
-		return ImageProcessingOutput{}, err
-	}
-	parsed := parseMetadata(metadata.Text())
-
-	composite, err := p.generate(ctx, input, compositePrompt(parsed.SuggestedAnimal))
+	composite, err := p.generate(ctx, input, compositePrompt)
 	if err != nil {
 		return ImageProcessingOutput{}, err
 	}
 
 	compositeImage, compositeMIME := generatedImage(composite, input)
+	metadata, err := p.generate(ctx, ImageProcessingInput{
+		Image:    compositeImage,
+		MIMEType: compositeMIME,
+		JobID:    input.JobID,
+		PhotoID:  input.PhotoID,
+	}, metadataPrompt)
+	if err != nil {
+		return ImageProcessingOutput{}, err
+	}
+	parsed := parseMetadata(metadata.Text())
 
 	return ImageProcessingOutput{
 		SuggestedAnimal:   parsed.SuggestedAnimal,
@@ -303,11 +307,14 @@ func (p *NanoBananaProcessor) generate(ctx context.Context, input ImageProcessin
 	return decoded, nil
 }
 
-const metadataPrompt = `Analyze this cloud photo. Return only compact JSON with keys suggested_animal, confidence, description. suggested_animal must be a short Japanese animal name. confidence must be a number from 0 to 1. description must be Japanese.`
+const compositePrompt = `与えられた雲の画像から動物を連想して、黒のマーカーで動物に見えるように綺麗に加筆してください。雲の一部だけを使っても構わない。雲自体の形を変えることは絶対にしてはならない。`
 
-func compositePrompt(animal string) string {
-	return fmt.Sprintf("Edit the provided cloud photo by overlaying a cute %s illustration that follows the cloud shape. Preserve the original photo as the background.", animal)
-}
+const metadataPrompt = `Analyze this edited cloud photo after black marker doodle lines were added.
+Infer what animal the final doodle and cloud silhouette depict.
+Return only compact JSON with keys suggested_animal, confidence, description.
+suggested_animal must be a short Japanese animal name.
+confidence must be a number from 0 to 1.
+description must be Japanese and should briefly explain which visible lines or cloud features make it look like that animal.`
 
 type processingMetadata struct {
 	SuggestedAnimal string  `json:"suggested_animal"`
