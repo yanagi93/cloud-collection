@@ -16,9 +16,25 @@ Equivalent `go generate` entrypoint:
 go generate ./...
 ```
 
+Run all generators:
+
+```sh
+make generate
+```
+
 After changing the OpenAPI spec or regenerating code, run:
 
 ```sh
 go mod tidy
 go test ./...
 ```
+
+## Generate Database Code
+
+SQL schema and queries for sqlc live under `sql/`.
+
+```sh
+make sqlc
+```
+
+Generated database code is written to `internal/db/gen`.
