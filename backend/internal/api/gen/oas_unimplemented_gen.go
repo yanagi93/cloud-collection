@@ -24,6 +24,18 @@ func (UnimplementedHandler) CreateAnimal(ctx context.Context, req *CreateAnimalR
 	return r, ht.ErrNotImplemented
 }
 
+// CreateBattle implements createBattle operation.
+//
+// Challenger_id と defender_id
+// で指定したコレクション動物同士のバトルを実行し、
+// 初期ステータス、勝者、ターンごとの行動ログを返す。 行動種別は attack
+// と attack_buff のみ。.
+//
+// POST /battles
+func (UnimplementedHandler) CreateBattle(ctx context.Context, req *CreateBattleRequest) (r CreateBattleRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteAnimal implements deleteAnimal operation.
 //
 // コレクションから削除.

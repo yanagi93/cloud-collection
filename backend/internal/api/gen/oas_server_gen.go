@@ -16,6 +16,15 @@ type Handler interface {
 	//
 	// POST /animals
 	CreateAnimal(ctx context.Context, req *CreateAnimalRequest) (CreateAnimalRes, error)
+	// CreateBattle implements createBattle operation.
+	//
+	// Challenger_id と defender_id
+	// で指定したコレクション動物同士のバトルを実行し、
+	// 初期ステータス、勝者、ターンごとの行動ログを返す。 行動種別は attack
+	// と attack_buff のみ。.
+	//
+	// POST /battles
+	CreateBattle(ctx context.Context, req *CreateBattleRequest) (CreateBattleRes, error)
 	// DeleteAnimal implements deleteAnimal operation.
 	//
 	// コレクションから削除.

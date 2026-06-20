@@ -280,6 +280,282 @@ func (s *AuthResponseTokenType) UnmarshalText(data []byte) error {
 	}
 }
 
+// バトル中の行動。type は attack または attack_buff のみ。 type=attack の場合は hit
+// と damage、type=attack_buff の場合は increment を返す。.
+// Ref: #/components/schemas/BattleAction
+type BattleAction struct {
+	Type BattleActionType `json:"type"`
+	// Type=attack の場合の命中結果.
+	Hit OptBool `json:"hit"`
+	// Type=attack の場合のダメージ量.
+	Damage OptInt `json:"damage"`
+	// Type=attack_buff の場合の attack 上昇量.
+	Increment OptInt `json:"increment"`
+}
+
+// GetType returns the value of Type.
+func (s *BattleAction) GetType() BattleActionType {
+	return s.Type
+}
+
+// GetHit returns the value of Hit.
+func (s *BattleAction) GetHit() OptBool {
+	return s.Hit
+}
+
+// GetDamage returns the value of Damage.
+func (s *BattleAction) GetDamage() OptInt {
+	return s.Damage
+}
+
+// GetIncrement returns the value of Increment.
+func (s *BattleAction) GetIncrement() OptInt {
+	return s.Increment
+}
+
+// SetType sets the value of Type.
+func (s *BattleAction) SetType(val BattleActionType) {
+	s.Type = val
+}
+
+// SetHit sets the value of Hit.
+func (s *BattleAction) SetHit(val OptBool) {
+	s.Hit = val
+}
+
+// SetDamage sets the value of Damage.
+func (s *BattleAction) SetDamage(val OptInt) {
+	s.Damage = val
+}
+
+// SetIncrement sets the value of Increment.
+func (s *BattleAction) SetIncrement(val OptInt) {
+	s.Increment = val
+}
+
+type BattleActionType string
+
+const (
+	BattleActionTypeAttack     BattleActionType = "attack"
+	BattleActionTypeAttackBuff BattleActionType = "attack_buff"
+)
+
+// AllValues returns all BattleActionType values.
+func (BattleActionType) AllValues() []BattleActionType {
+	return []BattleActionType{
+		BattleActionTypeAttack,
+		BattleActionTypeAttackBuff,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BattleActionType) MarshalText() ([]byte, error) {
+	switch s {
+	case BattleActionTypeAttack:
+		return []byte(s), nil
+	case BattleActionTypeAttackBuff:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BattleActionType) UnmarshalText(data []byte) error {
+	switch BattleActionType(data) {
+	case BattleActionTypeAttack:
+		*s = BattleActionTypeAttack
+		return nil
+	case BattleActionTypeAttackBuff:
+		*s = BattleActionTypeAttackBuff
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BattleInitialStatus
+type BattleInitialStatus struct {
+	Challenger BattleStatus `json:"challenger"`
+	Defender   BattleStatus `json:"defender"`
+}
+
+// GetChallenger returns the value of Challenger.
+func (s *BattleInitialStatus) GetChallenger() BattleStatus {
+	return s.Challenger
+}
+
+// GetDefender returns the value of Defender.
+func (s *BattleInitialStatus) GetDefender() BattleStatus {
+	return s.Defender
+}
+
+// SetChallenger sets the value of Challenger.
+func (s *BattleInitialStatus) SetChallenger(val BattleStatus) {
+	s.Challenger = val
+}
+
+// SetDefender sets the value of Defender.
+func (s *BattleInitialStatus) SetDefender(val BattleStatus) {
+	s.Defender = val
+}
+
+// Ref: #/components/schemas/BattleParticipantRole
+type BattleParticipantRole string
+
+const (
+	BattleParticipantRoleChallenger BattleParticipantRole = "challenger"
+	BattleParticipantRoleDefender   BattleParticipantRole = "defender"
+)
+
+// AllValues returns all BattleParticipantRole values.
+func (BattleParticipantRole) AllValues() []BattleParticipantRole {
+	return []BattleParticipantRole{
+		BattleParticipantRoleChallenger,
+		BattleParticipantRoleDefender,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s BattleParticipantRole) MarshalText() ([]byte, error) {
+	switch s {
+	case BattleParticipantRoleChallenger:
+		return []byte(s), nil
+	case BattleParticipantRoleDefender:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *BattleParticipantRole) UnmarshalText(data []byte) error {
+	switch BattleParticipantRole(data) {
+	case BattleParticipantRoleChallenger:
+		*s = BattleParticipantRoleChallenger
+		return nil
+	case BattleParticipantRoleDefender:
+		*s = BattleParticipantRoleDefender
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/BattleResult
+type BattleResult struct {
+	InitialStatus BattleInitialStatus   `json:"initial_status"`
+	Winner        BattleParticipantRole `json:"winner"`
+	BattleLog     []BattleTurnLog       `json:"battle_log"`
+}
+
+// GetInitialStatus returns the value of InitialStatus.
+func (s *BattleResult) GetInitialStatus() BattleInitialStatus {
+	return s.InitialStatus
+}
+
+// GetWinner returns the value of Winner.
+func (s *BattleResult) GetWinner() BattleParticipantRole {
+	return s.Winner
+}
+
+// GetBattleLog returns the value of BattleLog.
+func (s *BattleResult) GetBattleLog() []BattleTurnLog {
+	return s.BattleLog
+}
+
+// SetInitialStatus sets the value of InitialStatus.
+func (s *BattleResult) SetInitialStatus(val BattleInitialStatus) {
+	s.InitialStatus = val
+}
+
+// SetWinner sets the value of Winner.
+func (s *BattleResult) SetWinner(val BattleParticipantRole) {
+	s.Winner = val
+}
+
+// SetBattleLog sets the value of BattleLog.
+func (s *BattleResult) SetBattleLog(val []BattleTurnLog) {
+	s.BattleLog = val
+}
+
+func (*BattleResult) createBattleRes() {}
+
+// Ref: #/components/schemas/BattleStatus
+type BattleStatus struct {
+	Hp      int `json:"hp"`
+	Attack  int `json:"attack"`
+	Defense int `json:"defense"`
+	// 攻撃命中率（%）.
+	Accuracy int `json:"accuracy"`
+}
+
+// GetHp returns the value of Hp.
+func (s *BattleStatus) GetHp() int {
+	return s.Hp
+}
+
+// GetAttack returns the value of Attack.
+func (s *BattleStatus) GetAttack() int {
+	return s.Attack
+}
+
+// GetDefense returns the value of Defense.
+func (s *BattleStatus) GetDefense() int {
+	return s.Defense
+}
+
+// GetAccuracy returns the value of Accuracy.
+func (s *BattleStatus) GetAccuracy() int {
+	return s.Accuracy
+}
+
+// SetHp sets the value of Hp.
+func (s *BattleStatus) SetHp(val int) {
+	s.Hp = val
+}
+
+// SetAttack sets the value of Attack.
+func (s *BattleStatus) SetAttack(val int) {
+	s.Attack = val
+}
+
+// SetDefense sets the value of Defense.
+func (s *BattleStatus) SetDefense(val int) {
+	s.Defense = val
+}
+
+// SetAccuracy sets the value of Accuracy.
+func (s *BattleStatus) SetAccuracy(val int) {
+	s.Accuracy = val
+}
+
+// Ref: #/components/schemas/BattleTurnLog
+type BattleTurnLog struct {
+	Actor   BattleParticipantRole `json:"actor"`
+	Actions []BattleAction        `json:"actions"`
+}
+
+// GetActor returns the value of Actor.
+func (s *BattleTurnLog) GetActor() BattleParticipantRole {
+	return s.Actor
+}
+
+// GetActions returns the value of Actions.
+func (s *BattleTurnLog) GetActions() []BattleAction {
+	return s.Actions
+}
+
+// SetActor sets the value of Actor.
+func (s *BattleTurnLog) SetActor(val BattleParticipantRole) {
+	s.Actor = val
+}
+
+// SetActions sets the value of Actions.
+func (s *BattleTurnLog) SetActions(val []BattleAction) {
+	s.Actions = val
+}
+
 type BearerAuth struct {
 	Token string
 	Roles []string
@@ -520,6 +796,46 @@ func (s *CreateAnimalRequest) SetSpecies(val OptString) {
 type CreateAnimalUnauthorized Error
 
 func (*CreateAnimalUnauthorized) createAnimalRes() {}
+
+type CreateBattleBadRequest Error
+
+func (*CreateBattleBadRequest) createBattleRes() {}
+
+type CreateBattleNotFound Error
+
+func (*CreateBattleNotFound) createBattleRes() {}
+
+// Ref: #/components/schemas/CreateBattleRequest
+type CreateBattleRequest struct {
+	// 攻撃側としてバトルに参加するコレクション動物 ID.
+	ChallengerID uuid.UUID `json:"challenger_id"`
+	// 防御側としてバトルに参加するコレクション動物 ID.
+	DefenderID uuid.UUID `json:"defender_id"`
+}
+
+// GetChallengerID returns the value of ChallengerID.
+func (s *CreateBattleRequest) GetChallengerID() uuid.UUID {
+	return s.ChallengerID
+}
+
+// GetDefenderID returns the value of DefenderID.
+func (s *CreateBattleRequest) GetDefenderID() uuid.UUID {
+	return s.DefenderID
+}
+
+// SetChallengerID sets the value of ChallengerID.
+func (s *CreateBattleRequest) SetChallengerID(val uuid.UUID) {
+	s.ChallengerID = val
+}
+
+// SetDefenderID sets the value of DefenderID.
+func (s *CreateBattleRequest) SetDefenderID(val uuid.UUID) {
+	s.DefenderID = val
+}
+
+type CreateBattleUnauthorized Error
+
+func (*CreateBattleUnauthorized) createBattleRes() {}
 
 // DeleteAnimalNoContent is response for DeleteAnimal operation.
 type DeleteAnimalNoContent struct{}
