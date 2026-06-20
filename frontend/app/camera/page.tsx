@@ -134,8 +134,48 @@ export default function CameraPage() {
     return (
       <AuthGuard>
         <main className="h-dvh bg-gradient-to-b from-sky-300 via-sky-200 to-white flex justify-center items-center p-3 overflow-hidden">
+            
+            {/* 流れる雲 */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+
+                <div
+                className="absolute top-92 animate-cloud-slow text-[10rem] opacity-80"
+                style={{ animationDelay: "-7s" }}
+                >
+                ☁️
+                </div>
+
+                <div
+                className="absolute top-128 animate-cloud-slow text-[11rem] opacity-80"
+                style={{ animationDelay: "-15s" }}
+                >
+                ☁️
+                </div>
+
+                <div
+                className="absolute top-12 animate-cloud-slow text-[13rem] opacity-80"
+                style={{ animationDelay: "-10s" }}
+                >
+                ☁️
+                </div>
+
+                <div
+                className="absolute top-32 animate-cloud-medium text-[9rem] opacity-80"
+                style={{ animationDelay: "-20s" }}
+                >
+                ☁️
+                </div>
+
+                <div
+                className="absolute top-64 animate-cloud-fast text-[12rem] opacity-80"
+                style={{ animationDelay: "-5s" }}
+                >
+                ☁️
+                </div>
+            </div>
+                    
             <Card
-                className="w-full max-w-2xl max-h-[calc(100dvh-24px)] p-4 bg-white overflow-hidden"
+                className="w-full max-w-2xl max-h-[calc(100dvh-24px)] p-4 bg-white overflow-hidden z-20"
                 borderColor="#000000"
                 shadowColor="#222222"               
             >
@@ -163,7 +203,7 @@ export default function CameraPage() {
                                 className="w-[min(82vw,50dvh,420px)] aspect-square rounded-xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] object-cover"
                             />
 
-                            <div className="flex flex-wrap justify-center gap-3 mt-1">
+                            <div className="flex flex-wrap justify-center gap-3 mt-1 z-30">
                                 <Button
                                     onClick={capture}
                                     className="bg-sky-500 text-white font-bold text-base py-2 px-5"
@@ -172,7 +212,7 @@ export default function CameraPage() {
                                 </Button>
 
                                 <Button
-                                    className="bg-green-400 text-black font-bold"
+                                    className="bg-green-400 text-black font-bold z-30"
                                     onClick={() =>
                                         document.getElementById("image-upload")?.click()
                                     }
@@ -212,14 +252,14 @@ export default function CameraPage() {
                             <div className="flex justify-center gap-3 w-[min(82vw,50dvh,420px)]">
                                 <Button
                                     onClick={handleRetake}
-                                    className="bg-gray-400 text-white font-bold w-1/2 text-base py-2"
+                                    className="bg-gray-400 text-white font-bold w-1/2 text-base py-2 z-30"
                                 >
                                     ↩ やめる
                                 </Button>
 
                                 <Button
                                     onClick={handleCropImage}
-                                    className="bg-yellow-400 text-black font-bold w-1/2 text-base py-2"
+                                    className="bg-yellow-400 text-black font-bold w-1/2 text-base py-2 z-30"
                                 >
                                     ✂️ 切り取る
                                 </Button>
@@ -239,14 +279,14 @@ export default function CameraPage() {
                             <div className="flex flex-wrap justify-center gap-3 mt-1">
                                 <Button
                                     onClick={handleRetake}
-                                    className="bg-red-500 text-white font-bold text-base py-2 px-5"
+                                    className="bg-red-500 text-white font-bold text-base py-2 px-5 z-30"
                                 >
                                     🔄 撮り直し
                                 </Button>
 
                                 <Button
                                     onClick={handleNext}
-                                    className="bg-blue-600 text-white font-bold text-base py-2 px-5"
+                                    className="bg-blue-600 text-white font-bold text-base py-2 px-5 z-30"
                                 >
                                     次へ →
                                 </Button>
@@ -257,7 +297,7 @@ export default function CameraPage() {
                     <div className="mt-1">
                         <Button
                             onClick={() => router.push("/home")}
-                            className="bg-white text-black text-xs py-1 px-3"
+                            className="bg-white text-black text-xs py-1 px-3 z-30"
                         >
                             ← ホームへ戻る
                         </Button>

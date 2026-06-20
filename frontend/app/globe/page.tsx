@@ -2,8 +2,9 @@
 
 import CloudGlobe from "../../component/CloudGlobe";
 import AuthGuard from "@/component/AuthGuard";
-import { Button, Card } from "pixel-retroui";
+import { Button } from "pixel-retroui";
 import { useRouter } from "next/navigation";
+import StarField from "@/component/StarField";
 
 type CloudPhoto = {
     id: string;
@@ -26,31 +27,37 @@ const samplePhotos: CloudPhoto[] = [
 export default function GlobePage() {
   const router = useRouter();
 
-    return (
-      <AuthGuard>
-        <main className="min-h-screen overflow-hidden bg-sky-100 px-4 py-6">
-            <div className="mx-auto flex min-h-[90vh] max-w-5xl flex-col items-center justify-center">
-                <h1 className="mb-2 text-center text-2xl font-bold">
-                    雲の地球儀
-                </h1>
+  return (
+    <AuthGuard>
+      <main className="relative min-h-screen overflow-hidden px-4 py-6 bg-gradient-to-b from-black via-slate-900 to-blue-950">
 
-                <p className="mb-4 text-center text-sm">
-                    地球に現れた雲たちの中から、次の対戦相手を選ぼう。
-                </p>
+        <StarField />
+        
+        {/* タイトルエリア */}
+        <div className="mx-auto flex min-h-[90vh] max-w-5xl flex-col items-center justify-center relative z-10">
+          
+          <h1 className="mb-2 text-center text-2xl font-bold text-white">
+            雲の地球儀
+          </h1>
 
-                <CloudGlobe photos={samplePhotos} />
-            </div>
+          <p className="mb-4 text-center text-sm text-white/80">
+            地球に現れた雲たちの中から、次の対戦相手を選ぼう。
+          </p>
 
-            {/* 戻るボタン */}
-            <div className="flex justify-center mt-12">
-                <Button
-                  onClick={() => router.push("/home")}
-                  className="font-minecraft"
-                >
-                  🏠 ホームへ戻る
-                </Button>
-            </div>
-        </main>
-      </AuthGuard>
-    );
+          <CloudGlobe photos={samplePhotos} />
+        </div>
+
+        {/* 戻るボタン */}
+        <div className="flex justify-center mt-12 relative z-10">
+          <Button
+            onClick={() => router.push("/home")}
+            className="font-minecraft"
+          >
+            🏠 ホームへ戻る
+          </Button>
+        </div>
+
+      </main>
+    </AuthGuard>
+  );
 }

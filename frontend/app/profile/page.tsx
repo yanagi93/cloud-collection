@@ -112,12 +112,53 @@ export default function ProfilePage() {
   return (
   <AuthGuard>
     <main className="min-h-screen bg-gradient-to-b from-sky-200 to-white flex items-center justify-center">
+      
+              {/* 流れる雲 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+
+        <div
+          className="absolute top-92 animate-cloud-slow text-[10rem] opacity-80"
+          style={{ animationDelay: "-7s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-128 animate-cloud-slow text-[11rem] opacity-80"
+          style={{ animationDelay: "-15s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-12 animate-cloud-slow text-[13rem] opacity-80"
+          style={{ animationDelay: "-10s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-32 animate-cloud-medium text-[9rem] opacity-80"
+          style={{ animationDelay: "-20s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-64 animate-cloud-fast text-[12rem] opacity-80"
+          style={{ animationDelay: "-5s" }}
+        >
+          ☁️
+        </div>
+
+      </div>
+
       <Card
         bg="#fefcd0"
-        className="w-[500px] p-8"
+        className="w-[500px] p-8 z-20"
       >
 
-      <h1 className="font-minecraft text-4xl text-center mb-6">
+      <h1 className="font-minecraft text-4xl text-center mb-6 z-30">
         ☁️ マイページ
       </h1>
         <div className="flex flex-col items-center mb-6">
@@ -133,6 +174,7 @@ export default function ProfilePage() {
             justify-center
             text-6xl
             mx-auto
+            z-30
           "
         >
           ☁️
@@ -149,14 +191,14 @@ export default function ProfilePage() {
 
               <button
                 onClick={handleSave}
-                className="bg-green-500 text-white px-2 rounded"
+                className="bg-green-500 text-white px-2 rounded z-30"
               >
                 OK
               </button>
             </div>
           ) : (
             <h2
-              className="text-xl font-bold mt-3 cursor-pointer"
+              className="text-xl font-bold mt-3 cursor-pointer z-30"
               onClick={() => setEditMode(true)}
             >
               {username || "読み込み中..."} ✏️
@@ -176,6 +218,7 @@ export default function ProfilePage() {
               border-2
               border-black
               font-bold
+              z-30
             "
           >
             🏅 {title}
@@ -183,22 +226,22 @@ export default function ProfilePage() {
         </div>
 
         <Card className="p-4 mt-4">
-          <h2 className="font-bold text-center mb-3">
+          <h2 className="font-bold text-center mb-3 z-30">
             📊 プレイヤーデータ
           </h2>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between z-30">
             <span>☁️ 図鑑登録</span>
             <span>{cloudCount} 種類</span>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between z-30">
             <span>📷 撮影した雲</span>
             <span>{photoCount} 枚</span>
           </div>
         </Card>
 
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 z-30">
           <Button
             onClick={() => router.push("/home")}
             className="font-minecraft text-lg"
@@ -210,14 +253,14 @@ export default function ProfilePage() {
             onClick={() =>
               router.push("/collection")
             }
-            className="font-minecraft text-lg"
+            className="font-minecraft text-lg z-30"
           >
             ☁️ 図鑑を見る
           </Button>
 
           <Button
             onClick={() => router.push("/globe")}
-            className="font-minecraft text-lg"
+            className="font-minecraft text-lg z-30"
           >
             🌎 タイムラインを見る
           </Button>

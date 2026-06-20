@@ -170,10 +170,50 @@ export default function RegisterPage() {
         px-4
       "
     >
+      {/* 流れる雲 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+
+        <div
+          className="absolute top-92 animate-cloud-slow text-[10rem] opacity-80"
+          style={{ animationDelay: "-7s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-128 animate-cloud-slow text-[11rem] opacity-80"
+          style={{ animationDelay: "-15s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-12 animate-cloud-slow text-[13rem] opacity-80"
+          style={{ animationDelay: "-10s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-32 animate-cloud-medium text-[9rem] opacity-80"
+          style={{ animationDelay: "-20s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-64 animate-cloud-fast text-[12rem] opacity-80"
+          style={{ animationDelay: "-5s" }}
+        >
+          ☁️
+        </div>
+
+      </div>
+
       <Card
         bg="#f9e191"
         className="
-          w-full
+          w-full z-20
           max-w-md
           p-8
           flex
@@ -186,6 +226,7 @@ export default function RegisterPage() {
             text-3xl
             font-bold
             mb-2
+            z-30
           "
         >
           ☁ 新規登録
@@ -196,6 +237,7 @@ export default function RegisterPage() {
             text-sm
             text-center
             mb-6
+            z-30
           "
         >
           Cloud Collectionを始めよう
@@ -206,6 +248,7 @@ export default function RegisterPage() {
             flex
             flex-col
             gap-4
+            z-30
           "
         >
           {/* ユーザー名 */}
@@ -215,6 +258,7 @@ export default function RegisterPage() {
                 font-bold
                 text-center
                 mb-2
+                z-30
               "
             >
               ユーザー名
@@ -238,6 +282,7 @@ export default function RegisterPage() {
                 font-bold
                 text-center
                 mb-2
+                z-30
               "
             >
               メールアドレス
@@ -261,6 +306,7 @@ export default function RegisterPage() {
                 font-bold
                 text-center
                 mb-2
+                z-30
               "
             >
               パスワード

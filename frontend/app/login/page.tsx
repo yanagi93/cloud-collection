@@ -136,25 +136,44 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#87CEEB] to-[#E0F6FF] flex items-center justify-center">
 
-      {/* 背景雲 */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {clouds.map((cloud) => (
-          <div
-            key={cloud.id}
-            className="absolute left-[-200px] w-[200px] h-[60px] bg-white rounded-full animate-drift"
-            style={{
-              top: cloud.top,
-              animationDelay: cloud.delay,
-              animationDuration: cloud.duration,
-              transform: `scale(${cloud.scale})`,
-              opacity: cloud.opacity,
-              filter: "blur(4px)",
-            }}
-          >
-            <div className="absolute top-[-30px] left-[30px] w-[90px] h-[90px] bg-white rounded-full" />
-            <div className="absolute top-[-40px] left-[80px] w-[70px] h-[70px] bg-white rounded-full" />
-          </div>
-        ))}
+        {/* 流れる雲 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+
+        <div
+          className="absolute top-92 animate-cloud-slow text-[10rem] opacity-80"
+          style={{ animationDelay: "-7s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-128 animate-cloud-slow text-[11rem] opacity-80"
+          style={{ animationDelay: "-15s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-12 animate-cloud-slow text-[13rem] opacity-80"
+          style={{ animationDelay: "-10s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-32 animate-cloud-medium text-[9rem] opacity-80"
+          style={{ animationDelay: "-20s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-64 animate-cloud-fast text-[12rem] opacity-80"
+          style={{ animationDelay: "-5s" }}
+        >
+          ☁️
+        </div>
+
       </div>
 
       {/* ログインカード */}

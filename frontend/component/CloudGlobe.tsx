@@ -190,8 +190,9 @@ export default function CloudGlobe({ photos }: Props) {
                                     setSelectedPhoto(photo);
                                 }
                             }}
-                            className={`absolute z-20 w-20 border-2 border-black bg-white p-1.5 pb-5 shadow-[3px_3px_0px_#000] transition hover:scale-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${isSelected ? "ring-4 ring-sky-400" : ""
-                                }`}
+                            className={`absolute z-20 w-20 border-2 border-black bg-white p-1.5 pb-5 shadow-[3px_3px_0px_#000] transition hover:scale-110 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none ${
+                                isSelected ? "ring-4 ring-sky-400" : ""
+                            }`}
                             style={
                                 {
                                     positionAnchor: `--cobe-${marker.id}`,
@@ -219,7 +220,7 @@ export default function CloudGlobe({ photos }: Props) {
                 })}
             </div>
 
-            <p className="mt-2 text-center text-xs text-gray-600">
+            <p className="mt-2 text-center text-xs text-white/80">
                 地球をドラッグで回転できます
             </p>
 
@@ -234,12 +235,12 @@ export default function CloudGlobe({ photos }: Props) {
                             />
                         </div>
 
-                        <p className="mt-2 text-center text-xs font-bold tracking-wider">
+                        <p className="mt-2 text-center text-xs font-bold tracking-wider text-black">
                             SELECTED ENEMY
                         </p>
                     </div>
 
-                    <p className="mb-3 text-sm font-bold">
+                    <p className="mb-3 text-sm font-bold text-white">
                         この雲と戦いますか？
                     </p>
 
@@ -254,7 +255,11 @@ export default function CloudGlobe({ photos }: Props) {
 
                         <button
                             type="button"
-                            onClick={() => router.push(`/battle?enemyPhotoId=${selectedPhoto.id}`)}
+                            onClick={() =>
+                                router.push(
+                                    `/battle?enemyPhotoId=${selectedPhoto.id}`
+                                )
+                            }
                             className="w-1/2 rounded border-2 border-black bg-sky-200 px-4 py-2 text-sm font-bold shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
                             バトル開始！
@@ -262,7 +267,7 @@ export default function CloudGlobe({ photos }: Props) {
                     </div>
                 </div>
             ) : (
-                <p className="mt-5 text-center text-sm font-bold">
+                <p className="mt-5 text-center text-sm font-bold text-white">
                     戦う相手の雲を選んでください
                 </p>
             )}

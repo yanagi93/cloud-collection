@@ -204,13 +204,45 @@ export default function ResultPage() {
     return (
       <AuthGuard>
         <main className="min-h-screen bg-sky-300 flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
-            <div className="absolute top-10 left-[-50px] text-white opacity-40 text-4xl animate-pulse">
-                ☁️
-            </div>
+                    {/* 流れる雲 */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
 
-            <div className="absolute bottom-20 right-[-50px] text-white opacity-40 text-5xl">
-                ☁️
-            </div>
+                        <div
+                        className="absolute top-92 animate-cloud-slow text-[10rem] opacity-80"
+                        style={{ animationDelay: "-7s" }}
+                        >
+                        ☁️
+                        </div>
+
+                        <div
+                        className="absolute top-128 animate-cloud-slow text-[11rem] opacity-80"
+                        style={{ animationDelay: "-15s" }}
+                        >
+                        ☁️
+                        </div>
+
+                        <div
+                        className="absolute top-12 animate-cloud-slow text-[13rem] opacity-80"
+                        style={{ animationDelay: "-10s" }}
+                        >
+                        ☁️
+                        </div>
+
+                        <div
+                        className="absolute top-32 animate-cloud-medium text-[9rem] opacity-80"
+                        style={{ animationDelay: "-20s" }}
+                        >
+                        ☁️
+                        </div>
+
+                        <div
+                        className="absolute top-64 animate-cloud-fast text-[12rem] opacity-80"
+                        style={{ animationDelay: "-5s" }}
+                        >
+                        ☁️
+                        </div>
+
+                    </div>
 
             <div className="w-full max-w-md z-10">
                 <Card className="p-6 text-center bg-white" borderColor="#000000" shadowColor="#222222">

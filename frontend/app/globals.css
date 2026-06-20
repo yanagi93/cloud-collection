@@ -49,3 +49,25 @@
 .animate-float-fast {
     animation: floatFast 3.8s ease-in-out infinite;
 }
+
+@keyframes cloudMove {
+  0% {
+    transform: translateX(-200px);
+  }
+
+  100% {
+    transform: translateX(calc(100vw + 200px));
+  }
+}
+
+.animate-cloud-slow {
+  animation: cloudMove 40s linear infinite;
+}
+
+.animate-cloud-medium {
+  animation: cloudMove 30s linear infinite;
+}
+
+.animate-cloud-fast {
+  animation: cloudMove 20s linear infinite;
+}

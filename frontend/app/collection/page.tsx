@@ -80,21 +80,62 @@ export default function CollectionPage() {
     <main className="min-h-screen bg-gradient-to-b from-sky-300 to-sky-100 p-8">
       {/* タイトル */}
       <div className="text-center mb-10">
-        <h1 className="font-minecraft text-5xl mb-3">
+        <h1 className="font-minecraft text-5xl mb-3 z-20">
           ☁️ 雲図鑑
         </h1>
 
-        <p className="font-minecraft text-lg">
+        <p className="font-minecraft text-lg z-20">
           発見した雲モンスター
         </p>
 
-        <p className="font-minecraft text-sm mt-2">
+        <p className="font-minecraft text-sm mt-2 z-20">
           発見数: {cloudAnimals.length} / 100
         </p>
+
+      </div>
+
+              {/* 流れる雲 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+
+        <div
+          className="absolute top-92 animate-cloud-slow text-[10rem] opacity-80"
+          style={{ animationDelay: "-7s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-128 animate-cloud-slow text-[11rem] opacity-80"
+          style={{ animationDelay: "-15s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-12 animate-cloud-slow text-[13rem] opacity-80"
+          style={{ animationDelay: "-10s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-32 animate-cloud-medium text-[9rem] opacity-80"
+          style={{ animationDelay: "-20s" }}
+        >
+          ☁️
+        </div>
+
+        <div
+          className="absolute top-64 animate-cloud-fast text-[12rem] opacity-80"
+          style={{ animationDelay: "-5s" }}
+        >
+          ☁️
+        </div>
+
       </div>
 
       {/* 図鑑一覧 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto z-20">
         {cloudAnimals.map((cloud) => {
           const rarity = getRarity(cloud.hp ?? 0);
 
@@ -102,7 +143,7 @@ export default function CollectionPage() {
             <Link
               key={cloud.id}
               href={`/cloud-detail/${cloud.id}`}
-              className="hover:scale-105 transition-all duration-300"
+              className="hover:scale-105 transition-all duration-300 z-20"
             >
               <Card
                 bg={
@@ -121,7 +162,7 @@ export default function CollectionPage() {
                   h-full
                   ${
                     rarity >= 4
-                      ? "border-4 border-yellow-400 shadow-xl"
+                      ? "border-4 border-yellow-400 shadow-xl z-20"
                       : ""
                   }
                 `}
@@ -132,11 +173,11 @@ export default function CollectionPage() {
                     cloud.original_image_url
                   }
                   alt={cloud.name}
-                  className="w-full h-48 object-cover rounded mb-4"
+                  className="w-full h-48 object-cover rounded mb-4 z-20"
                 />
 
                 {/* レアリティ */}
-                <div className="text-center mb-3">
+                <div className="text-center mb-3 z-20">
                   <div className="text-yellow-500 text-xl">
                     {"★".repeat(rarity)}
                     {"☆".repeat(5 - rarity)}
@@ -176,7 +217,7 @@ export default function CollectionPage() {
         {/* 撮影へ誘導 */}
         <Link
           href="/camera"
-          className="hover:scale-105 transition-all duration-300"
+          className="hover:scale-105 transition-all duration-300 z-20"
         >
           <Card
             className="
@@ -188,9 +229,10 @@ export default function CollectionPage() {
               bg-sky-50
               hover:bg-sky-100
               cursor-pointer
+              z-20
             "
           >
-            <div className="w-full h-48 flex flex-col items-center justify-center">
+            <div className="w-full h-48 flex flex-col items-center justify-center z-20">
               <div className="text-7xl mb-2">
                 📷
               </div>
@@ -200,11 +242,11 @@ export default function CollectionPage() {
               </div>
             </div>
 
-            <h2 className="font-minecraft text-xl text-center font-bold">
+            <h2 className="font-minecraft text-xl text-center font-bold z-20">
               雲の写真を撮ろう！
             </h2>
 
-            <p className="text-center text-sm mt-2 text-gray-600">
+            <p className="text-center text-sm mt-2 text-gray-600 z-20">
               新しい雲モンスターを発見しよう
             </p>
           </Card>
@@ -215,7 +257,7 @@ export default function CollectionPage() {
       <div className="flex justify-center mt-12">
         <Button
           onClick={() => router.push("/home")}
-          className="font-minecraft"
+          className="font-minecraft z-20"
         >
           🏠 ホームへ戻る
         </Button>
