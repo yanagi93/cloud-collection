@@ -1987,6 +1987,14 @@ func (s *Pagination) SetTotalPages(val int) {
 	s.TotalPages = val
 }
 
+type PickupTimelineAnimalsBadRequest Error
+
+func (*PickupTimelineAnimalsBadRequest) pickupTimelineAnimalsRes() {}
+
+type PickupTimelineAnimalsUnauthorized Error
+
+func (*PickupTimelineAnimalsUnauthorized) pickupTimelineAnimalsRes() {}
+
 // Ref: #/components/schemas/ProcessingJob
 type ProcessingJob struct {
 	ID      uuid.UUID        `json:"id"`
@@ -2277,6 +2285,23 @@ func (*StartProcessingNotFound) startProcessingRes() {}
 type StartProcessingUnauthorized Error
 
 func (*StartProcessingUnauthorized) startProcessingRes() {}
+
+// Ref: #/components/schemas/TimelinePickup
+type TimelinePickup struct {
+	Items []Animal `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *TimelinePickup) GetItems() []Animal {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *TimelinePickup) SetItems(val []Animal) {
+	s.Items = val
+}
+
+func (*TimelinePickup) pickupTimelineAnimalsRes() {}
 
 type UpdateAnimalBadRequest Error
 

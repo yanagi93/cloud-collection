@@ -78,6 +78,10 @@ func (r *AnimalRepository) Count(ctx context.Context, userID uuid.UUID, q pgtype
 	})
 }
 
+func (r *AnimalRepository) PickupTimeline(ctx context.Context, arg dbgen.PickupTimelineAnimalsParams) ([]dbgen.Animal, error) {
+	return r.queries.PickupTimelineAnimals(ctx, arg)
+}
+
 func (r *AnimalRepository) Update(ctx context.Context, arg dbgen.UpdateAnimalParams) (dbgen.Animal, error) {
 	return r.queries.UpdateAnimal(ctx, arg)
 }

@@ -35,19 +35,20 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 
 // operationRolesBearerAuth is a private map storing roles per operation.
 var operationRolesBearerAuth = map[string][]string{
-	CreateAnimalOperation:        []string{},
-	CreateBattleOperation:        []string{},
-	DeleteAnimalOperation:        []string{},
-	DeleteCloudPhotoOperation:    []string{},
-	GetAnimalOperation:           []string{},
-	GetCloudPhotoOperation:       []string{},
-	GetCurrentUserOperation:      []string{},
-	GetProcessingResultOperation: []string{},
-	ListAnimalsOperation:         []string{},
-	ListCloudPhotosOperation:     []string{},
-	StartProcessingOperation:     []string{},
-	UpdateAnimalOperation:        []string{},
-	UploadCloudPhotoOperation:    []string{},
+	CreateAnimalOperation:          []string{},
+	CreateBattleOperation:          []string{},
+	DeleteAnimalOperation:          []string{},
+	DeleteCloudPhotoOperation:      []string{},
+	GetAnimalOperation:             []string{},
+	GetCloudPhotoOperation:         []string{},
+	GetCurrentUserOperation:        []string{},
+	GetProcessingResultOperation:   []string{},
+	ListAnimalsOperation:           []string{},
+	ListCloudPhotosOperation:       []string{},
+	PickupTimelineAnimalsOperation: []string{},
+	StartProcessingOperation:       []string{},
+	UpdateAnimalOperation:          []string{},
+	UploadCloudPhotoOperation:      []string{},
 }
 
 // GetRolesForBearerAuth returns the required roles for the given operation.

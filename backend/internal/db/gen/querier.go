@@ -37,6 +37,7 @@ type Querier interface {
 	ListCloudPhotos(ctx context.Context, arg ListCloudPhotosParams) ([]ListCloudPhotosRow, error)
 	ListPendingProcessingJobs(ctx context.Context, limit int32) ([]ProcessingJob, error)
 	MarkProcessingJobStarted(ctx context.Context, id uuid.UUID) (ProcessingJob, error)
+	PickupTimelineAnimals(ctx context.Context, arg PickupTimelineAnimalsParams) ([]Animal, error)
 	SyncCloudPhotoStatusFromLatestJob(ctx context.Context, id uuid.UUID) (CloudPhoto, error)
 	UpdateAnimal(ctx context.Context, arg UpdateAnimalParams) (Animal, error)
 	UpdateCloudPhotoStatus(ctx context.Context, arg UpdateCloudPhotoStatusParams) (CloudPhoto, error)

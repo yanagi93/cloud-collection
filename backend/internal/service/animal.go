@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -59,6 +60,13 @@ type AnimalListResult struct {
 	PageSize   int
 	TotalItems int
 	TotalPages int
+}
+
+type TimelinePickupInput struct {
+	ViewerUserID uuid.UUID
+	CreatedFrom  time.Time
+	CreatedTo    time.Time
+	Count        int
 }
 
 type AnimalSort string
@@ -154,6 +162,19 @@ func (s *AnimalService) List(ctx context.Context, userID uuid.UUID, page, pageSi
 		TotalItems: int(total),
 		TotalPages: totalPages(int(total), pageSize),
 	}, nil
+}
+
+func (s *AnimalService) PickupTimeline(ctx context.Context, input TimelinePickupInput) ([]dbgen.Animal, error) {
+	if input.Count < 1 || input.Count > 100 || input.CreatedFrom.After(input.CreatedTo) {
+		return nil, ErrInvalidAnimalRequest
+	}
+
+	return s.animals.PickupTimeline(ctx, dbgen.PickupTimelineAnimalsParams{
+		ViewerUserID: input.ViewerUserID,
+		CreatedFrom:  pgtype.Timestamptz{Time: input.CreatedFrom, Valid: true},
+		CreatedTo:    pgtype.Timestamptz{Time: input.CreatedTo, Valid: true},
+		LimitCount:   int32(input.Count),
+	})
 }
 
 func (s *AnimalService) Update(ctx context.Context, input UpdateAnimalInput) (dbgen.Animal, error) {

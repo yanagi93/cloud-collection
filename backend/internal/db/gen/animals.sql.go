@@ -488,6 +488,68 @@ func (q *Queries) ListAnimalsNameDesc(ctx context.Context, arg ListAnimalsNameDe
 	return items, nil
 }
 
+const pickupTimelineAnimals = `-- name: PickupTimelineAnimals :many
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
+FROM animals
+WHERE user_id <> $1
+  AND created_at >= $2
+  AND created_at <= $3
+ORDER BY random()
+LIMIT $4
+`
+
+type PickupTimelineAnimalsParams struct {
+	ViewerUserID uuid.UUID          `db:"viewer_user_id" json:"viewer_user_id"`
+	CreatedFrom  pgtype.Timestamptz `db:"created_from" json:"created_from"`
+	CreatedTo    pgtype.Timestamptz `db:"created_to" json:"created_to"`
+	LimitCount   int32              `db:"limit_count" json:"limit_count"`
+}
+
+func (q *Queries) PickupTimelineAnimals(ctx context.Context, arg PickupTimelineAnimalsParams) ([]Animal, error) {
+	rows, err := q.db.Query(ctx, pickupTimelineAnimals,
+		arg.ViewerUserID,
+		arg.CreatedFrom,
+		arg.CreatedTo,
+		arg.LimitCount,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Animal
+	for rows.Next() {
+		var i Animal
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.PhotoID,
+			&i.ProcessingJobID,
+			&i.Name,
+			&i.Species,
+			&i.OriginalImageUrl,
+			&i.CompositeImageUrl,
+			&i.Confidence,
+			&i.Description,
+			&i.Hp,
+			&i.Attack,
+			&i.Evasion,
+			&i.Defense,
+			&i.CapturedAt,
+			&i.Latitude,
+			&i.Longitude,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateAnimal = `-- name: UpdateAnimal :one
 UPDATE animals
 SET
