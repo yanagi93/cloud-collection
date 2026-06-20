@@ -60,6 +60,7 @@ func (h *Handler) UploadCloudPhoto(ctx context.Context, req *gen.UploadCloudPhot
 	photo, err := h.cloudPhotos.Create(ctx, service.CreateCloudPhotoInput{
 		UserID:         userID,
 		Filename:       req.Image.Name,
+		Image:          req.Image.File,
 		Size:           req.Image.Size,
 		CapturedAt:     req.CapturedAt.Value,
 		CapturedAtSet:  req.CapturedAt.Set,
@@ -81,6 +82,16 @@ func (h *Handler) UploadCloudPhoto(ctx context.Context, req *gen.UploadCloudPhot
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	if req.AutoProcess.Or(true) {
+		if _, err := h.processing.Start(ctx, userID, photo.ID); err != nil && !errors.Is(err, service.ErrProcessingJobConflict) {
+			return nil, err
+		}
+		photo, err = h.cloudPhotos.Get(ctx, userID, photo.ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return cloudPhotoDetailResponse(photo), nil

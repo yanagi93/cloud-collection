@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -25,20 +28,23 @@ var ErrInvalidCloudPhotoRequest = errors.New("invalid cloud photo request")
 var ErrCloudPhotoTooLarge = errors.New("cloud photo too large")
 
 type CloudPhotoService struct {
-	photos *repository.CloudPhotoRepository
-	now    func() time.Time
+	photos      *repository.CloudPhotoRepository
+	uploadsRoot string
+	now         func() time.Time
 }
 
-func NewCloudPhotoService(photos *repository.CloudPhotoRepository) *CloudPhotoService {
+func NewCloudPhotoService(photos *repository.CloudPhotoRepository, uploadsRoot string) *CloudPhotoService {
 	return &CloudPhotoService{
-		photos: photos,
-		now:    time.Now,
+		photos:      photos,
+		uploadsRoot: uploadsRoot,
+		now:         time.Now,
 	}
 }
 
 type CreateCloudPhotoInput struct {
 	UserID         uuid.UUID
 	Filename       string
+	Image          io.Reader
 	Size           int64
 	CapturedAt     time.Time
 	CapturedAtSet  bool
@@ -63,6 +69,9 @@ func (s *CloudPhotoService) Create(ctx context.Context, input CreateCloudPhotoIn
 	if filename == "" {
 		return repository.CloudPhotoDetail{}, ErrInvalidCloudPhotoRequest
 	}
+	if input.Image == nil {
+		return repository.CloudPhotoDetail{}, ErrInvalidCloudPhotoRequest
+	}
 	if input.Size > maxCloudPhotoImageSize {
 		return repository.CloudPhotoDetail{}, ErrCloudPhotoTooLarge
 	}
@@ -73,9 +82,14 @@ func (s *CloudPhotoService) Create(ctx context.Context, input CreateCloudPhotoIn
 		return repository.CloudPhotoDetail{}, ErrInvalidCloudPhotoRequest
 	}
 
+	originalURL, err := s.writeOriginalImage(input.UserID, filename, input.Image)
+	if err != nil {
+		return repository.CloudPhotoDetail{}, err
+	}
+
 	photo, err := s.photos.Create(ctx, dbgen.CreateCloudPhotoParams{
 		UserID:           input.UserID,
-		OriginalImageUrl: originalImageURL(input.UserID, filename, s.now().UTC()),
+		OriginalImageUrl: originalURL,
 		CapturedAt:       timestamptz(input.CapturedAt, input.CapturedAtSet),
 		Latitude:         float8(input.Latitude, input.LatitudeSet),
 		Longitude:        float8(input.Longitude, input.LongitudeSet),
@@ -134,9 +148,34 @@ func (s *CloudPhotoService) Delete(ctx context.Context, userID, photoID uuid.UUI
 	return nil
 }
 
-func originalImageURL(userID uuid.UUID, filename string, now time.Time) string {
+func (s *CloudPhotoService) writeOriginalImage(userID uuid.UUID, filename string, image io.Reader) (string, error) {
+	now := s.now().UTC()
+	rel := originalImageRelativePath(userID, filename, now)
+	fullPath := filepath.Join(s.uploadsRoot, filepath.FromSlash(rel))
+	if err := os.MkdirAll(filepath.Dir(fullPath), 0o755); err != nil {
+		return "", err
+	}
+
+	file, err := os.Create(fullPath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	limited := io.LimitReader(image, maxCloudPhotoImageSize+1)
+	written, err := io.Copy(file, limited)
+	if err != nil {
+		return "", err
+	}
+	if written > maxCloudPhotoImageSize {
+		return "", ErrCloudPhotoTooLarge
+	}
+	return "/uploads/" + rel, nil
+}
+
+func originalImageRelativePath(userID uuid.UUID, filename string, now time.Time) string {
 	escapedFilename := url.PathEscape(path.Base(filename))
-	return fmt.Sprintf("/uploads/cloud-photos/%s/%d-%s", userID, now.UnixNano(), escapedFilename)
+	return fmt.Sprintf("cloud-photos/%s/%d-%s", userID, now.UnixNano(), escapedFilename)
 }
 
 func totalPages(totalItems, pageSize int) int {

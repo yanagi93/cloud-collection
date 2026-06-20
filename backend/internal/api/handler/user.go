@@ -13,12 +13,14 @@ type Handler struct {
 	gen.UnimplementedHandler
 	auth        *service.AuthService
 	cloudPhotos *service.CloudPhotoService
+	processing  *service.ProcessingService
 }
 
-func New(auth *service.AuthService, cloudPhotos *service.CloudPhotoService) *Handler {
+func New(auth *service.AuthService, cloudPhotos *service.CloudPhotoService, processing *service.ProcessingService) *Handler {
 	return &Handler{
 		auth:        auth,
 		cloudPhotos: cloudPhotos,
+		processing:  processing,
 	}
 }
 
