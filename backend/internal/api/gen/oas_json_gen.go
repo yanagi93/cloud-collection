@@ -50,12 +50,6 @@ func (s *Animal) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.DoodleImageURL.Set {
-			e.FieldStart("doodle_image_url")
-			s.DoodleImageURL.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("composite_image_url")
 		json.EncodeURI(e, s.CompositeImageURL)
 	}
@@ -95,21 +89,20 @@ func (s *Animal) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAnimal = [14]string{
+var jsonFieldsNameOfAnimal = [13]string{
 	0:  "id",
 	1:  "user_id",
 	2:  "photo_id",
 	3:  "name",
 	4:  "species",
 	5:  "original_image_url",
-	6:  "doodle_image_url",
-	7:  "composite_image_url",
-	8:  "confidence",
-	9:  "description",
-	10: "captured_at",
-	11: "location",
-	12: "created_at",
-	13: "updated_at",
+	6:  "composite_image_url",
+	7:  "confidence",
+	8:  "description",
+	9:  "captured_at",
+	10: "location",
+	11: "created_at",
+	12: "updated_at",
 }
 
 // Decode decodes Animal from json.
@@ -191,18 +184,8 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"original_image_url\"")
 			}
-		case "doodle_image_url":
-			if err := func() error {
-				s.DoodleImageURL.Reset()
-				if err := s.DoodleImageURL.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"doodle_image_url\"")
-			}
 		case "composite_image_url":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := json.DecodeURI(d)
 				s.CompositeImageURL = v
@@ -254,7 +237,7 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"location\"")
 			}
 		case "created_at":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -285,8 +268,8 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b10011111,
-		0b00010000,
+		0b01011111,
+		0b00001000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3073,21 +3056,16 @@ func (s *ProcessingResult) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("doodle_image_url")
-		json.EncodeURI(e, s.DoodleImageURL)
-	}
-	{
 		e.FieldStart("composite_image_url")
 		json.EncodeURI(e, s.CompositeImageURL)
 	}
 }
 
-var jsonFieldsNameOfProcessingResult = [5]string{
+var jsonFieldsNameOfProcessingResult = [4]string{
 	0: "suggested_animal",
 	1: "confidence",
 	2: "description",
-	3: "doodle_image_url",
-	4: "composite_image_url",
+	3: "composite_image_url",
 }
 
 // Decode decodes ProcessingResult from json.
@@ -3133,20 +3111,8 @@ func (s *ProcessingResult) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "doodle_image_url":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := json.DecodeURI(d)
-				s.DoodleImageURL = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"doodle_image_url\"")
-			}
 		case "composite_image_url":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeURI(d)
 				s.CompositeImageURL = v
@@ -3167,7 +3133,7 @@ func (s *ProcessingResult) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011011,
+		0b00001011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

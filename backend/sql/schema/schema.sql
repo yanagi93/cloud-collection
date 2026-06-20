@@ -39,7 +39,6 @@ CREATE TABLE processing_jobs (
     suggested_animal varchar(30),
     confidence double precision,
     description text,
-    doodle_image_url text,
     composite_image_url text,
     error_code text,
     error_message text,
@@ -53,7 +52,6 @@ CREATE TABLE processing_jobs (
         OR (
             suggested_animal IS NOT NULL
             AND confidence IS NOT NULL
-            AND doodle_image_url IS NOT NULL
             AND composite_image_url IS NOT NULL
             AND completed_at IS NOT NULL
         )
@@ -76,7 +74,6 @@ CREATE TABLE animals (
     name varchar(30) NOT NULL CHECK (length(name) BETWEEN 1 AND 30),
     species varchar(30) NOT NULL CHECK (length(species) BETWEEN 1 AND 30),
     original_image_url text NOT NULL,
-    doodle_image_url text NOT NULL,
     composite_image_url text NOT NULL,
     confidence double precision NOT NULL CHECK (confidence >= 0 AND confidence <= 1),
     description text,

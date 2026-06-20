@@ -557,7 +557,7 @@ components:
       description: |
         - pending: アップロード済み、未処理
         - processing: AI 解析中
-        - completed: 解析・落書き生成完了
+        - completed: 解析・合成画像生成完了
         - failed: 解析失敗
 
     CloudPhoto:
@@ -674,7 +674,6 @@ components:
       required:
         - suggested_animal
         - confidence
-        - doodle_image_url
         - composite_image_url
       properties:
         suggested_animal:
@@ -692,14 +691,10 @@ components:
           type: string
           description: AI による雲の形の説明
           example: 右側に耳のような突起があり、全体がうさぎの横顔に見える
-        doodle_image_url:
-          type: string
-          format: uri
-          description: 生成された落書きレイヤー画像 URL（透過 PNG）
         composite_image_url:
           type: string
           format: uri
-          description: オリジナル写真に落書きを合成した画像 URL
+          description: オリジナル写真に動物イラストを合成した画像 URL
 
     CreateAnimalRequest:
       type: object
@@ -764,9 +759,6 @@ components:
           description: 連想された動物種別
           example: うさぎ
         original_image_url:
-          type: string
-          format: uri
-        doodle_image_url:
           type: string
           format: uri
         composite_image_url:

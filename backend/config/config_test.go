@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoadReadsDotEnv(t *testing.T) {
-	restore := preserveEnv(t, "DATABASE_URL", "JWT_SECRET", "PORT", "HTTP_ADDR", "JWT_EXPIRES_IN_SECONDS", "SHUTDOWN_TIMEOUT_SECONDS")
+	restore := preserveEnv(t, "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "JWT_SECRET", "PORT", "HTTP_ADDR", "JWT_EXPIRES_IN_SECONDS", "SHUTDOWN_TIMEOUT_SECONDS")
 	defer restore()
 
 	dir := t.TempDir()
@@ -16,6 +16,7 @@ func TestLoadReadsDotEnv(t *testing.T) {
 
 	writeDotEnv(t, dir, `
 DATABASE_URL=postgres://dotenv
+CORS_ALLOWED_ORIGINS=http://localhost:3000, http://127.0.0.1:3000
 JWT_SECRET=dotenv-secret
 PORT=9090
 JWT_EXPIRES_IN_SECONDS=7200
@@ -28,6 +29,9 @@ SHUTDOWN_TIMEOUT_SECONDS=15
 	}
 	if cfg.DatabaseURL != "postgres://dotenv" {
 		t.Fatalf("DatabaseURL = %q", cfg.DatabaseURL)
+	}
+	if got, want := cfg.CORSAllowedOrigins, []string{"http://localhost:3000", "http://127.0.0.1:3000"}; !equalStrings(got, want) {
+		t.Fatalf("CORSAllowedOrigins = %#v", got)
 	}
 	if cfg.JWTSecret != "dotenv-secret" {
 		t.Fatalf("JWTSecret = %q", cfg.JWTSecret)
@@ -44,7 +48,7 @@ SHUTDOWN_TIMEOUT_SECONDS=15
 }
 
 func TestLoadPrefersEnvironmentOverDotEnv(t *testing.T) {
-	restore := preserveEnv(t, "DATABASE_URL", "JWT_SECRET", "PORT", "HTTP_ADDR", "JWT_EXPIRES_IN_SECONDS", "SHUTDOWN_TIMEOUT_SECONDS")
+	restore := preserveEnv(t, "DATABASE_URL", "CORS_ALLOWED_ORIGINS", "JWT_SECRET", "PORT", "HTTP_ADDR", "JWT_EXPIRES_IN_SECONDS", "SHUTDOWN_TIMEOUT_SECONDS")
 	defer restore()
 
 	dir := t.TempDir()
@@ -52,12 +56,14 @@ func TestLoadPrefersEnvironmentOverDotEnv(t *testing.T) {
 
 	writeDotEnv(t, dir, `
 DATABASE_URL=postgres://dotenv
+CORS_ALLOWED_ORIGINS=http://localhost:3000
 JWT_SECRET=dotenv-secret
 PORT=9090
 JWT_EXPIRES_IN_SECONDS=7200
 SHUTDOWN_TIMEOUT_SECONDS=15
 `)
 	setenv(t, "DATABASE_URL", "postgres://env")
+	setenv(t, "CORS_ALLOWED_ORIGINS", "https://app.example.com")
 	setenv(t, "JWT_SECRET", "env-secret")
 	setenv(t, "HTTP_ADDR", ":7070")
 	setenv(t, "JWT_EXPIRES_IN_SECONDS", "1800")
@@ -69,6 +75,9 @@ SHUTDOWN_TIMEOUT_SECONDS=15
 	}
 	if cfg.DatabaseURL != "postgres://env" {
 		t.Fatalf("DatabaseURL = %q", cfg.DatabaseURL)
+	}
+	if got, want := cfg.CORSAllowedOrigins, []string{"https://app.example.com"}; !equalStrings(got, want) {
+		t.Fatalf("CORSAllowedOrigins = %#v", got)
 	}
 	if cfg.JWTSecret != "env-secret" {
 		t.Fatalf("JWTSecret = %q", cfg.JWTSecret)
@@ -82,6 +91,18 @@ SHUTDOWN_TIMEOUT_SECONDS=15
 	if cfg.ShutdownTimeout != 5*time.Second {
 		t.Fatalf("ShutdownTimeout = %s", cfg.ShutdownTimeout)
 	}
+}
+
+func equalStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func chdir(t *testing.T, dir string) {

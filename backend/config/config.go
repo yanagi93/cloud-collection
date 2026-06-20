@@ -11,22 +11,32 @@ import (
 )
 
 type Config struct {
-	HTTPAddr        string
-	DatabaseURL     string
-	JWTSecret       string
-	JWTExpiresIn    time.Duration
-	ShutdownTimeout time.Duration
+	HTTPAddr           string
+	DatabaseURL        string
+	CORSAllowedOrigins []string
+	JWTSecret          string
+	JWTExpiresIn       time.Duration
+	ShutdownTimeout    time.Duration
+	UploadsDir         string
+	NanoBananaAPIKey   string
+	NanoBananaModel    string
+	NanoBananaEndpoint string
 }
 
 func Load() (Config, error) {
 	dotenv := readDotEnvFiles("../.env", ".env")
 
 	cfg := Config{
-		HTTPAddr:        httpAddr(get("HTTP_ADDR", dotenv, ""), get("PORT", dotenv, "8080")),
-		DatabaseURL:     get("DATABASE_URL", dotenv, ""),
-		JWTSecret:       get("JWT_SECRET", dotenv, ""),
-		JWTExpiresIn:    durationSeconds(get("JWT_EXPIRES_IN_SECONDS", dotenv, "3600")),
-		ShutdownTimeout: durationSeconds(get("SHUTDOWN_TIMEOUT_SECONDS", dotenv, "10")),
+		HTTPAddr:           httpAddr(get("HTTP_ADDR", dotenv, ""), get("PORT", dotenv, "8080")),
+		DatabaseURL:        get("DATABASE_URL", dotenv, ""),
+		CORSAllowedOrigins: list(get("CORS_ALLOWED_ORIGINS", dotenv, "http://localhost:3000")),
+		JWTSecret:          get("JWT_SECRET", dotenv, ""),
+		JWTExpiresIn:       durationSeconds(get("JWT_EXPIRES_IN_SECONDS", dotenv, "3600")),
+		ShutdownTimeout:    durationSeconds(get("SHUTDOWN_TIMEOUT_SECONDS", dotenv, "10")),
+		UploadsDir:         get("UPLOADS_DIR", dotenv, "uploads"),
+		NanoBananaAPIKey:   get("NANO_BANANA_API_KEY", dotenv, ""),
+		NanoBananaModel:    get("NANO_BANANA_MODEL", dotenv, "gemini-3.1-flash-image"),
+		NanoBananaEndpoint: get("NANO_BANANA_ENDPOINT", dotenv, "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -105,6 +115,18 @@ func durationSeconds(value string) time.Duration {
 		return 0
 	}
 	return time.Duration(seconds) * time.Second
+}
+
+func list(value string) []string {
+	parts := strings.Split(value, ",")
+	values := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			values = append(values, part)
+		}
+	}
+	return values
 }
 
 func (c Config) String() string {
