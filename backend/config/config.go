@@ -13,6 +13,7 @@ import (
 type Config struct {
 	HTTPAddr           string
 	DatabaseURL        string
+	CORSAllowedOrigins []string
 	JWTSecret          string
 	JWTExpiresIn       time.Duration
 	ShutdownTimeout    time.Duration
@@ -28,6 +29,7 @@ func Load() (Config, error) {
 	cfg := Config{
 		HTTPAddr:           httpAddr(get("HTTP_ADDR", dotenv, ""), get("PORT", dotenv, "8080")),
 		DatabaseURL:        get("DATABASE_URL", dotenv, ""),
+		CORSAllowedOrigins: list(get("CORS_ALLOWED_ORIGINS", dotenv, "http://localhost:3000")),
 		JWTSecret:          get("JWT_SECRET", dotenv, ""),
 		JWTExpiresIn:       durationSeconds(get("JWT_EXPIRES_IN_SECONDS", dotenv, "3600")),
 		ShutdownTimeout:    durationSeconds(get("SHUTDOWN_TIMEOUT_SECONDS", dotenv, "10")),
@@ -113,6 +115,18 @@ func durationSeconds(value string) time.Duration {
 		return 0
 	}
 	return time.Duration(seconds) * time.Second
+}
+
+func list(value string) []string {
+	parts := strings.Split(value, ",")
+	values := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			values = append(values, part)
+		}
+	}
+	return values
 }
 
 func (c Config) String() string {

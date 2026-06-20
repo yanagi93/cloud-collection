@@ -66,7 +66,7 @@ func run() error {
 
 	server := &http.Server{
 		Addr:    cfg.HTTPAddr,
-		Handler: mux,
+		Handler: middleware.CORS(cfg.CORSAllowedOrigins, mux),
 	}
 
 	errCh := make(chan error, 1)
