@@ -33,6 +33,8 @@ tags:
     description: 名前付き動物コレクション
   - name: Battles
     description: 登録済み動物同士のバトル
+  - name: Timeline
+    description: 他ユーザーのコレクションを使ったタイムライン表示
 
 paths:
   /auth/register:
@@ -465,6 +467,51 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /timeline/pickup:
+    get:
+      tags: [Timeline]
+      operationId: pickupTimelineAnimals
+      summary: 他ユーザーの動物を期間内からランダム取得
+      description: |
+        ログインユーザー以外が指定期間内に登録した動物から、指定件数をランダムに取得する。
+        created_from と created_to は animals.created_at に対する期間条件として扱う。
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: created_from
+          in: query
+          required: true
+          description: 取得対象期間の開始日時（この日時以降）
+          schema:
+            type: string
+            format: date-time
+        - name: created_to
+          in: query
+          required: true
+          description: 取得対象期間の終了日時（この日時以前）
+          schema:
+            type: string
+            format: date-time
+        - name: count
+          in: query
+          required: true
+          description: ランダム取得する件数
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: ランダムに取得した動物一覧
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinePickup'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
 components:
   securitySchemes:
@@ -899,6 +946,15 @@ components:
             $ref: '#/components/schemas/Animal'
         pagination:
           $ref: '#/components/schemas/Pagination'
+
+    TimelinePickup:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Animal'
 
     CreateBattleRequest:
       type: object

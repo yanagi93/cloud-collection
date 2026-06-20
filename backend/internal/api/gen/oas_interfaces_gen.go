@@ -45,6 +45,10 @@ type LoginUserRes interface {
 	loginUserRes()
 }
 
+type PickupTimelineAnimalsRes interface {
+	pickupTimelineAnimalsRes()
+}
+
 type RegisterUserRes interface {
 	registerUserRes()
 }

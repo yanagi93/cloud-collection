@@ -23,7 +23,7 @@ var (
 	rn12AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
-	rn14AllowedHeaders = map[string]string{
+	rn15AllowedHeaders = map[string]string{
 		"POST": "Content-Type",
 	}
 	rn3AllowedHeaders = map[string]string{
@@ -42,6 +42,9 @@ var (
 		"POST": "Authorization",
 	}
 	rn8AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn13AllowedHeaders = map[string]string{
 		"GET": "Authorization",
 	}
 )
@@ -234,7 +237,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							default:
 								s.notAllowed(w, r, notAllowedParams{
 									allowedMethods: "POST",
-									allowedHeaders: rn14AllowedHeaders,
+									allowedHeaders: rn15AllowedHeaders,
 									acceptPost:     "application/json",
 									acceptPatch:    "",
 								})
@@ -389,6 +392,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						s.notAllowed(w, r, notAllowedParams{
 							allowedMethods: "GET",
 							allowedHeaders: rn8AllowedHeaders,
+							acceptPost:     "",
+							acceptPatch:    "",
+						})
+					}
+
+					return
+				}
+
+			case 't': // Prefix: "timeline/pickup"
+
+				if l := len("timeline/pickup"); len(elem) >= l && elem[0:l] == "timeline/pickup" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handlePickupTimelineAnimalsRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, notAllowedParams{
+							allowedMethods: "GET",
+							allowedHeaders: rn13AllowedHeaders,
 							acceptPost:     "",
 							acceptPatch:    "",
 						})
@@ -817,6 +845,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.operationID = "getCurrentUser"
 						r.operationGroup = ""
 						r.pathPattern = "/me"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+			case 't': // Prefix: "timeline/pickup"
+
+				if l := len("timeline/pickup"); len(elem) >= l && elem[0:l] == "timeline/pickup" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = PickupTimelineAnimalsOperation
+						r.summary = "他ユーザーの動物を期間内からランダム取得"
+						r.operationID = "pickupTimelineAnimals"
+						r.operationGroup = ""
+						r.pathPattern = "/timeline/pickup"
 						r.args = args
 						r.count = 0
 						return r, true

@@ -116,6 +116,15 @@ WHERE user_id = $1
       OR species ILIKE '%' || sqlc.narg('q')::text || '%'
   );
 
+-- name: PickupTimelineAnimals :many
+SELECT *
+FROM animals
+WHERE user_id <> sqlc.arg('viewer_user_id')
+  AND created_at >= sqlc.arg('created_from')
+  AND created_at <= sqlc.arg('created_to')
+ORDER BY random()
+LIMIT sqlc.arg('limit_count');
+
 -- name: UpdateAnimal :one
 UPDATE animals
 SET

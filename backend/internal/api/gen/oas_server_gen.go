@@ -82,6 +82,13 @@ type Handler interface {
 	//
 	// POST /auth/login
 	LoginUser(ctx context.Context, req *LoginRequest) (LoginUserRes, error)
+	// PickupTimelineAnimals implements pickupTimelineAnimals operation.
+	//
+	// ログインユーザー以外が指定期間内に登録した動物から、指定件数をランダムに取得する。
+	// created_from と created_to は animals.created_at に対する期間条件として扱う。.
+	//
+	// GET /timeline/pickup
+	PickupTimelineAnimals(ctx context.Context, params PickupTimelineAnimalsParams) (PickupTimelineAnimalsRes, error)
 	// RegisterUser implements registerUser operation.
 	//
 	// ユーザー登録.

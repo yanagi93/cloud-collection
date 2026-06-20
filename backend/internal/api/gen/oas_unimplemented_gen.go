@@ -120,6 +120,16 @@ func (UnimplementedHandler) LoginUser(ctx context.Context, req *LoginRequest) (r
 	return r, ht.ErrNotImplemented
 }
 
+// PickupTimelineAnimals implements pickupTimelineAnimals operation.
+//
+// ログインユーザー以外が指定期間内に登録した動物から、指定件数をランダムに取得する。
+// created_from と created_to は animals.created_at に対する期間条件として扱う。.
+//
+// GET /timeline/pickup
+func (UnimplementedHandler) PickupTimelineAnimals(ctx context.Context, params PickupTimelineAnimalsParams) (r PickupTimelineAnimalsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RegisterUser implements registerUser operation.
 //
 // ユーザー登録.
