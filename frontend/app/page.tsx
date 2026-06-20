@@ -2,38 +2,57 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React from 'react';
-import { Button } from 'pixel-retroui';
+import { Button, Card } from "pixel-retroui";
 
 export default function Home() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-sky-100">
-      
-      <div className="relative">
-        
-        <Image
-          src="/images/new-title.png"
-          alt="Pre Cloud Collection"
-          width={1000}
-          height={700}
-          priority
-        />
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-200 to-white">
 
-        {/* ゲームスタート → ログイン */}
-        <div className="absolute bottom-[85px] left-1/2 -translate-x-1/2">
-          <Button onClick={() => router.push("/login")}>
-            ゲームスタート
-          </Button>
+      <Card className="relative w-[900px] p-6 text-center">
+
+        {/* タイトル画像 */}
+        <div className="relative mb-6">
+          <Image
+            src="/images/new-title.png"
+            alt="Cloud Collection"
+            width={900}
+            height={600}
+            priority
+          />
         </div>
-        {/* ゲームスタート → 新規登録 */}
-        <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2">
-          <Button onClick={() => router.push("/register")}>
-            新規登録
+
+        {/* サブタイトル */}
+        <h1 className="text-3xl font-bold mb-2">
+          ☁ CLOUD COLLECTION
+        </h1>
+
+        <p className="text-gray-600 mb-8">
+          雲を集めて育てるRPG
+        </p>
+
+        {/* ボタンエリア */}
+        <div className="flex flex-col gap-4 items-center">
+
+          <Button
+            onClick={() => router.push("/login")}
+            className="w-[250px] text-lg"
+          >
+            ▶ ゲームスタート
           </Button>
+
+          <Button
+            onClick={() => router.push("/register")}
+            className="w-[250px] text-lg"
+          >
+            ▶ 新規登録
+          </Button>
+
         </div>
-      </div>
+
+      </Card>
+
     </main>
   );
 }
