@@ -21,6 +21,7 @@ type ProcessingJob = {
         code?: string;
         message?: string;
     } | null;
+    message?: string;
 };
 
 type CloudPhoto = {
@@ -65,32 +66,38 @@ export default function ResultPage() {
     const [isPolling, setIsPolling] = useState(false);
 
     useEffect(() => {
-        const savedOriginalImage = sessionStorage.getItem("selectedCloudImage");
-        const savedPhoto = sessionStorage.getItem("uploadedCloudPhoto");
+        const timer = window.setTimeout(() => {
+            const savedOriginalImage = sessionStorage.getItem("selectedCloudImage");
+            const savedPhoto = sessionStorage.getItem("uploadedCloudPhoto");
 
-        if (!savedOriginalImage) {
-            router.replace("/camera");
-            return;
-        }
-
-        setOriginalImgSrc(savedOriginalImage);
-
-        if (!savedPhoto) {
-            setMessage("アップロード情報が見つかりません。もう一度撮影してください。");
-            return;
-        }
-
-        try {
-            const parsedPhoto = JSON.parse(savedPhoto) as CloudPhoto;
-            setPhoto(parsedPhoto);
-
-            if (parsedPhoto.processing) {
-                setProcessing(parsedPhoto.processing);
+            if (!savedOriginalImage) {
+                router.replace("/camera");
+                return;
             }
-        } catch (error) {
-            console.error(error);
-            setMessage("アップロード情報の読み込みに失敗しました。");
-        }
+
+            setOriginalImgSrc(savedOriginalImage);
+
+            if (!savedPhoto) {
+                setMessage("アップロード情報が見つかりません。もう一度撮影してください。");
+                return;
+            }
+
+            try {
+                const parsedPhoto = JSON.parse(savedPhoto) as CloudPhoto;
+                setPhoto(parsedPhoto);
+
+                if (parsedPhoto.processing) {
+                    setProcessing(parsedPhoto.processing);
+                }
+            } catch (error) {
+                console.error(error);
+                setMessage("アップロード情報の読み込みに失敗しました。");
+            }
+        }, 0);
+
+        return () => {
+            window.clearTimeout(timer);
+        };
     }, [router]);
 
     useEffect(() => {
@@ -99,7 +106,6 @@ export default function ResultPage() {
         const token = localStorage.getItem("accessToken");
 
         if (!token) {
-            setMessage("ログイン情報がありません。もう一度ログインしてください。");
             router.push("/login");
             return;
         }
@@ -119,10 +125,10 @@ export default function ResultPage() {
 
                 const responseText = await response.text();
 
-                let data: any = {};
+                let data: ProcessingJob = {};
 
                 try {
-                    data = responseText ? JSON.parse(responseText) : {};
+                    data = responseText ? (JSON.parse(responseText) as ProcessingJob) : {};
                 } catch {
                     data = {
                         message: responseText || "JSONではないレスポンスが返ってきました",
@@ -143,7 +149,7 @@ export default function ResultPage() {
                     return;
                 }
 
-                const job = data as ProcessingJob;
+                const job = data;
                 const status = job.status ?? "unknown";
 
                 setProcessing(job);
@@ -200,6 +206,33 @@ export default function ResultPage() {
     const resultImageUrl = toBackendImageUrl(result?.composite_image_url);
     const suggestedAnimal = result?.suggested_animal;
     const description = result?.description;
+    const canRegister =
+        Boolean(photo?.id) &&
+        status === "completed" &&
+        Boolean(result?.composite_image_url) &&
+        Boolean(suggestedAnimal);
+
+    const handleGoToRegister = () => {
+        if (!photo?.id || !result?.composite_image_url || !suggestedAnimal) {
+            setMessage("生成が完了してから登録できます。");
+            return;
+        }
+
+        sessionStorage.setItem(
+            "pendingAnimal",
+            JSON.stringify({
+                photoId: photo.id,
+                originalImageUrl:
+                    photo.original_image_url ?? originalImgSrc ?? "",
+                compositeImageUrl: toBackendImageUrl(result.composite_image_url),
+                suggestedAnimal,
+                confidence: result.confidence ?? 0,
+                description,
+            })
+        );
+
+        router.push("/cloud-register");
+    };
 
     return (
       <AuthGuard>
@@ -330,8 +363,10 @@ export default function ResultPage() {
                         </Button>
 
                         <Button
-                            onClick={() => router.push("/cloud-register")}
-                            className="h-16 flex items-center justify-center bg-white text-black font-bold text-lg"
+                            onClick={handleGoToRegister}
+                            disabled={!canRegister}
+                            className={`h-16 flex items-center justify-center bg-white text-black font-bold text-lg ${!canRegister ? "opacity-50 cursor-not-allowed" : ""
+                                }`}
                         >
                             🏠 登録画面へ
                         </Button>
