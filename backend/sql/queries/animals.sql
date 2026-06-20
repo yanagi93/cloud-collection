@@ -6,7 +6,6 @@ INSERT INTO animals (
     name,
     species,
     original_image_url,
-    doodle_image_url,
     composite_image_url,
     confidence,
     description,
@@ -21,7 +20,6 @@ SELECT
     sqlc.arg('name'),
     coalesce(sqlc.narg('species')::text, pj.suggested_animal),
     cp.original_image_url,
-    pj.doodle_image_url,
     pj.composite_image_url,
     pj.confidence,
     pj.description,
@@ -35,7 +33,6 @@ WHERE cp.id = sqlc.arg('photo_id')
   AND pj.status = 'completed'
   AND pj.suggested_animal IS NOT NULL
   AND pj.confidence IS NOT NULL
-  AND pj.doodle_image_url IS NOT NULL
   AND pj.composite_image_url IS NOT NULL
 ORDER BY pj.completed_at DESC, pj.created_at DESC
 LIMIT 1

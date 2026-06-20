@@ -43,7 +43,6 @@ INSERT INTO animals (
     name,
     species,
     original_image_url,
-    doodle_image_url,
     composite_image_url,
     confidence,
     description,
@@ -58,7 +57,6 @@ SELECT
     $1,
     coalesce($2::text, pj.suggested_animal),
     cp.original_image_url,
-    pj.doodle_image_url,
     pj.composite_image_url,
     pj.confidence,
     pj.description,
@@ -72,11 +70,10 @@ WHERE cp.id = $3
   AND pj.status = 'completed'
   AND pj.suggested_animal IS NOT NULL
   AND pj.confidence IS NOT NULL
-  AND pj.doodle_image_url IS NOT NULL
   AND pj.composite_image_url IS NOT NULL
 ORDER BY pj.completed_at DESC, pj.created_at DESC
 LIMIT 1
-RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 `
 
 type CreateAnimalFromCompletedJobParams struct {
@@ -102,7 +99,6 @@ func (q *Queries) CreateAnimalFromCompletedJob(ctx context.Context, arg CreateAn
 		&i.Name,
 		&i.Species,
 		&i.OriginalImageUrl,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
@@ -135,7 +131,7 @@ func (q *Queries) DeleteAnimal(ctx context.Context, arg DeleteAnimalParams) (int
 }
 
 const getAnimalByID = `-- name: GetAnimalByID :one
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE id = $1
   AND user_id = $2
@@ -157,7 +153,6 @@ func (q *Queries) GetAnimalByID(ctx context.Context, arg GetAnimalByIDParams) (A
 		&i.Name,
 		&i.Species,
 		&i.OriginalImageUrl,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
@@ -171,7 +166,7 @@ func (q *Queries) GetAnimalByID(ctx context.Context, arg GetAnimalByIDParams) (A
 }
 
 const getAnimalByPhotoID = `-- name: GetAnimalByPhotoID :one
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE photo_id = $1
   AND user_id = $2
@@ -193,7 +188,6 @@ func (q *Queries) GetAnimalByPhotoID(ctx context.Context, arg GetAnimalByPhotoID
 		&i.Name,
 		&i.Species,
 		&i.OriginalImageUrl,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
@@ -207,7 +201,7 @@ func (q *Queries) GetAnimalByPhotoID(ctx context.Context, arg GetAnimalByPhotoID
 }
 
 const listAnimalsCreatedAtAsc = `-- name: ListAnimalsCreatedAtAsc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -248,7 +242,6 @@ func (q *Queries) ListAnimalsCreatedAtAsc(ctx context.Context, arg ListAnimalsCr
 			&i.Name,
 			&i.Species,
 			&i.OriginalImageUrl,
-			&i.DoodleImageUrl,
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
@@ -269,7 +262,7 @@ func (q *Queries) ListAnimalsCreatedAtAsc(ctx context.Context, arg ListAnimalsCr
 }
 
 const listAnimalsCreatedAtDesc = `-- name: ListAnimalsCreatedAtDesc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -310,7 +303,6 @@ func (q *Queries) ListAnimalsCreatedAtDesc(ctx context.Context, arg ListAnimalsC
 			&i.Name,
 			&i.Species,
 			&i.OriginalImageUrl,
-			&i.DoodleImageUrl,
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
@@ -331,7 +323,7 @@ func (q *Queries) ListAnimalsCreatedAtDesc(ctx context.Context, arg ListAnimalsC
 }
 
 const listAnimalsNameAsc = `-- name: ListAnimalsNameAsc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -372,7 +364,6 @@ func (q *Queries) ListAnimalsNameAsc(ctx context.Context, arg ListAnimalsNameAsc
 			&i.Name,
 			&i.Species,
 			&i.OriginalImageUrl,
-			&i.DoodleImageUrl,
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
@@ -393,7 +384,7 @@ func (q *Queries) ListAnimalsNameAsc(ctx context.Context, arg ListAnimalsNameAsc
 }
 
 const listAnimalsNameDesc = `-- name: ListAnimalsNameDesc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -434,7 +425,6 @@ func (q *Queries) ListAnimalsNameDesc(ctx context.Context, arg ListAnimalsNameDe
 			&i.Name,
 			&i.Species,
 			&i.OriginalImageUrl,
-			&i.DoodleImageUrl,
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
@@ -462,7 +452,7 @@ SET
     updated_at = now()
 WHERE id = $3
   AND user_id = $4
-RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, doodle_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
 `
 
 type UpdateAnimalParams struct {
@@ -488,7 +478,6 @@ func (q *Queries) UpdateAnimal(ctx context.Context, arg UpdateAnimalParams) (Ani
 		&i.Name,
 		&i.Species,
 		&i.OriginalImageUrl,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
