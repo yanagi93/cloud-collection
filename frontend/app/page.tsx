@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Button from "@/component/Button";
 
 export default function Home() {
   const router = useRouter();
@@ -20,49 +21,21 @@ export default function Home() {
         />
 
         {/* ゲームスタート → ログイン */}
-        <button
-          onClick={() => router.push("/login")}
-          className="
-            absolute
-            bottom-[85px]
-            left-1/2
-            -translate-x-1/2
-            rounded-full
-            bg-blue-500
-            px-8
-            py-4
-            text-xl
-            font-bold
-            text-white
-            shadow-lg
-            transition-all duration-300 hover:scale-105
-            shadow-lg hover:shadow-xl
-          "
-        >
-          ゲームスタート
-        </button>
-
-        {/* 新規登録 */}
-        <button
-          onClick={() => router.push("/register")}
-          className="
-            absolute
-            bottom-[20px]
-            left-1/2
-            -translate-x-1/2
-            rounded-full
-            bg-yellow-500
-            px-8
-            py-4
-            text-xl
-            font-bold
-            text-white
-            transition-all duration-300 hover:scale-105
-            shadow-lg hover:shadow-xl
-          "
-        >
-          新規登録
-        </button>
+        <div className="absolute bottom-[85px] left-1/2 -translate-x-1/2">
+          <Button
+            text="ゲームスタート"
+            color="blue"
+            onClick={() => router.push("/login")}
+          />
+        </div>
+        {/* ゲームスタート → 新規登録 */}
+        <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2">
+          <Button
+            text="新規登録"
+            color="yellow"
+            onClick={() => router.push("/register")}
+          />
+        </div>
       </div>
     </main>
   );
