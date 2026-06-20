@@ -44,7 +44,11 @@ func run() error {
 	users := repository.NewUserRepository(queries)
 	auth := service.NewAuthService(users, cfg.JWTSecret, cfg.JWTExpiresIn)
 
-	apiServer, err := gen.NewServer(handler.New(auth), middleware.NewSecurityHandler())
+	apiServer, err := gen.NewServer(
+		handler.New(auth),
+		middleware.NewSecurityHandler(auth),
+		gen.WithErrorHandler(handler.ErrorHandler),
+	)
 	if err != nil {
 		return err
 	}

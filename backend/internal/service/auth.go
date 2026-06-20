@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
@@ -20,6 +21,7 @@ import (
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
 var ErrEmailAlreadyRegistered = errors.New("email already registered")
+var ErrInvalidToken = errors.New("invalid token")
 
 type AuthService struct {
 	users        *repository.UserRepository
@@ -89,6 +91,27 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (LoginR
 	return s.issueToken(user)
 }
 
+func (s *AuthService) CurrentUser(ctx context.Context, userID uuid.UUID) (dbgen.User, error) {
+	user, err := s.users.GetByID(ctx, userID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return dbgen.User{}, ErrInvalidToken
+	}
+	return user, err
+}
+
+func (s *AuthService) VerifyAccessToken(token string) (uuid.UUID, error) {
+	claims, err := s.verifyJWT(token)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	userID, err := uuid.Parse(claims.Subject)
+	if err != nil {
+		return uuid.Nil, ErrInvalidToken
+	}
+	return userID, nil
+}
+
 func (s *AuthService) issueToken(user dbgen.User) (LoginResult, error) {
 	now := s.now().UTC()
 	expiresAt := now.Add(s.jwtExpiresIn)
@@ -108,6 +131,40 @@ func (s *AuthService) issueToken(user dbgen.User) (LoginResult, error) {
 		ExpiresIn:   int(s.jwtExpiresIn.Seconds()),
 		User:        user,
 	}, nil
+}
+
+func (s *AuthService) verifyJWT(token string) (jwtClaims, error) {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return jwtClaims{}, ErrInvalidToken
+	}
+
+	unsigned := parts[0] + "." + parts[1]
+	mac := hmac.New(sha256.New, s.jwtSecret)
+	mac.Write([]byte(unsigned))
+	wantSignature := mac.Sum(nil)
+
+	gotSignature, err := base64.RawURLEncoding.DecodeString(parts[2])
+	if err != nil {
+		return jwtClaims{}, ErrInvalidToken
+	}
+	if !hmac.Equal(gotSignature, wantSignature) {
+		return jwtClaims{}, ErrInvalidToken
+	}
+
+	claimsJSON, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return jwtClaims{}, ErrInvalidToken
+	}
+
+	var claims jwtClaims
+	if err := json.Unmarshal(claimsJSON, &claims); err != nil {
+		return jwtClaims{}, ErrInvalidToken
+	}
+	if claims.ExpiresAt <= s.now().UTC().Unix() {
+		return jwtClaims{}, ErrInvalidToken
+	}
+	return claims, nil
 }
 
 func isUniqueViolation(err error) bool {

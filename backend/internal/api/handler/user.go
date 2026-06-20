@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	gen "github.com/yanagi93/cloud-collection/backend/internal/api/gen"
+	"github.com/yanagi93/cloud-collection/backend/internal/api/middleware"
 	"github.com/yanagi93/cloud-collection/backend/internal/service"
 )
 
@@ -53,6 +54,28 @@ func (h *Handler) LoginUser(ctx context.Context, req *gen.LoginRequest) (gen.Log
 	return authResponse(result), nil
 }
 
+func (h *Handler) GetCurrentUser(ctx context.Context) (gen.GetCurrentUserRes, error) {
+	userID, ok := middleware.CurrentUserID(ctx)
+	if !ok {
+		return unauthorizedError(), nil
+	}
+
+	user, err := h.auth.CurrentUser(ctx, userID)
+	if errors.Is(err, service.ErrInvalidToken) {
+		return unauthorizedError(), nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &gen.User{
+		ID:          user.ID,
+		Email:       user.Email,
+		DisplayName: user.DisplayName,
+		CreatedAt:   user.CreatedAt.Time,
+	}, nil
+}
+
 func authResponse(result service.LoginResult) *gen.AuthResponse {
 	return &gen.AuthResponse{
 		AccessToken: result.AccessToken,
@@ -64,5 +87,12 @@ func authResponse(result service.LoginResult) *gen.AuthResponse {
 			DisplayName: result.User.DisplayName,
 			CreatedAt:   result.User.CreatedAt.Time,
 		},
+	}
+}
+
+func unauthorizedError() *gen.Error {
+	return &gen.Error{
+		Code:    "UNAUTHORIZED",
+		Message: "認証が必要です",
 	}
 }
