@@ -181,12 +181,11 @@ func apiProcessingJob(item repository.CloudPhotoDetail) gen.OptProcessingJob {
 		CompletedAt: apiNilDateTime(item.CompletedAt),
 		CreatedAt:   item.ProcessingCreatedAt.Time,
 	}
-	if item.SuggestedAnimal.Valid && item.Confidence.Valid && item.DoodleImageURL.Valid && item.CompositeImageURL.Valid {
+	if item.SuggestedAnimal.Valid && item.Confidence.Valid && item.CompositeImageURL.Valid {
 		job.Result.SetTo(gen.ProcessingResult{
 			SuggestedAnimal:   item.SuggestedAnimal.String,
 			Confidence:        float32(item.Confidence.Float64),
 			Description:       apiString(item.Description),
-			DoodleImageURL:    urlValue(item.DoodleImageURL.String),
 			CompositeImageURL: urlValue(item.CompositeImageURL.String),
 		})
 	}

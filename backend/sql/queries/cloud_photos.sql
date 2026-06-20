@@ -36,7 +36,6 @@ SELECT
     pj.suggested_animal,
     pj.confidence,
     pj.description,
-    pj.doodle_image_url,
     pj.composite_image_url,
     pj.error_code,
     pj.error_message,

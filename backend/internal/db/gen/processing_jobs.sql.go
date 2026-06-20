@@ -19,15 +19,14 @@ SET
     suggested_animal = $2,
     confidence = $3,
     description = $4,
-    doodle_image_url = $5,
-    composite_image_url = $6,
+    composite_image_url = $5,
     error_code = NULL,
     error_message = NULL,
     completed_at = now(),
     updated_at = now()
 WHERE id = $1
   AND status IN ('pending', 'processing')
-RETURNING id, photo_id, status, suggested_animal, confidence, description, doodle_image_url, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
+RETURNING id, photo_id, status, suggested_animal, confidence, description, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
 `
 
 type CompleteProcessingJobParams struct {
@@ -35,7 +34,6 @@ type CompleteProcessingJobParams struct {
 	SuggestedAnimal   pgtype.Text   `db:"suggested_animal" json:"suggested_animal"`
 	Confidence        pgtype.Float8 `db:"confidence" json:"confidence"`
 	Description       pgtype.Text   `db:"description" json:"description"`
-	DoodleImageUrl    pgtype.Text   `db:"doodle_image_url" json:"doodle_image_url"`
 	CompositeImageUrl pgtype.Text   `db:"composite_image_url" json:"composite_image_url"`
 }
 
@@ -45,7 +43,6 @@ func (q *Queries) CompleteProcessingJob(ctx context.Context, arg CompleteProcess
 		arg.SuggestedAnimal,
 		arg.Confidence,
 		arg.Description,
-		arg.DoodleImageUrl,
 		arg.CompositeImageUrl,
 	)
 	var i ProcessingJob
@@ -56,7 +53,6 @@ func (q *Queries) CompleteProcessingJob(ctx context.Context, arg CompleteProcess
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,
@@ -76,7 +72,7 @@ INSERT INTO processing_jobs (
     $1,
     'pending'
 )
-RETURNING id, photo_id, status, suggested_animal, confidence, description, doodle_image_url, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
+RETURNING id, photo_id, status, suggested_animal, confidence, description, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
 `
 
 func (q *Queries) CreateProcessingJob(ctx context.Context, photoID uuid.UUID) (ProcessingJob, error) {
@@ -89,7 +85,6 @@ func (q *Queries) CreateProcessingJob(ctx context.Context, photoID uuid.UUID) (P
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,
@@ -111,7 +106,7 @@ SET
     updated_at = now()
 WHERE id = $1
   AND status IN ('pending', 'processing')
-RETURNING id, photo_id, status, suggested_animal, confidence, description, doodle_image_url, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
+RETURNING id, photo_id, status, suggested_animal, confidence, description, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
 `
 
 type FailProcessingJobParams struct {
@@ -130,7 +125,6 @@ func (q *Queries) FailProcessingJob(ctx context.Context, arg FailProcessingJobPa
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,
@@ -143,7 +137,7 @@ func (q *Queries) FailProcessingJob(ctx context.Context, arg FailProcessingJobPa
 }
 
 const getLatestProcessingJobByPhotoID = `-- name: GetLatestProcessingJobByPhotoID :one
-SELECT pj.id, pj.photo_id, pj.status, pj.suggested_animal, pj.confidence, pj.description, pj.doodle_image_url, pj.composite_image_url, pj.error_code, pj.error_message, pj.started_at, pj.completed_at, pj.created_at, pj.updated_at
+SELECT pj.id, pj.photo_id, pj.status, pj.suggested_animal, pj.confidence, pj.description, pj.composite_image_url, pj.error_code, pj.error_message, pj.started_at, pj.completed_at, pj.created_at, pj.updated_at
 FROM processing_jobs pj
 JOIN cloud_photos cp ON cp.id = pj.photo_id
 WHERE pj.photo_id = $1
@@ -167,7 +161,6 @@ func (q *Queries) GetLatestProcessingJobByPhotoID(ctx context.Context, arg GetLa
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,
@@ -180,7 +173,7 @@ func (q *Queries) GetLatestProcessingJobByPhotoID(ctx context.Context, arg GetLa
 }
 
 const getProcessingJobByID = `-- name: GetProcessingJobByID :one
-SELECT pj.id, pj.photo_id, pj.status, pj.suggested_animal, pj.confidence, pj.description, pj.doodle_image_url, pj.composite_image_url, pj.error_code, pj.error_message, pj.started_at, pj.completed_at, pj.created_at, pj.updated_at
+SELECT pj.id, pj.photo_id, pj.status, pj.suggested_animal, pj.confidence, pj.description, pj.composite_image_url, pj.error_code, pj.error_message, pj.started_at, pj.completed_at, pj.created_at, pj.updated_at
 FROM processing_jobs pj
 JOIN cloud_photos cp ON cp.id = pj.photo_id
 WHERE pj.id = $1
@@ -202,7 +195,6 @@ func (q *Queries) GetProcessingJobByID(ctx context.Context, arg GetProcessingJob
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,
@@ -215,7 +207,7 @@ func (q *Queries) GetProcessingJobByID(ctx context.Context, arg GetProcessingJob
 }
 
 const listPendingProcessingJobs = `-- name: ListPendingProcessingJobs :many
-SELECT id, photo_id, status, suggested_animal, confidence, description, doodle_image_url, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
+SELECT id, photo_id, status, suggested_animal, confidence, description, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
 FROM processing_jobs
 WHERE status = 'pending'
 ORDER BY created_at ASC
@@ -238,7 +230,6 @@ func (q *Queries) ListPendingProcessingJobs(ctx context.Context, limit int32) ([
 			&i.SuggestedAnimal,
 			&i.Confidence,
 			&i.Description,
-			&i.DoodleImageUrl,
 			&i.CompositeImageUrl,
 			&i.ErrorCode,
 			&i.ErrorMessage,
@@ -265,7 +256,7 @@ SET
     updated_at = now()
 WHERE id = $1
   AND status = 'pending'
-RETURNING id, photo_id, status, suggested_animal, confidence, description, doodle_image_url, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
+RETURNING id, photo_id, status, suggested_animal, confidence, description, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
 `
 
 func (q *Queries) MarkProcessingJobStarted(ctx context.Context, id uuid.UUID) (ProcessingJob, error) {
@@ -278,7 +269,6 @@ func (q *Queries) MarkProcessingJobStarted(ctx context.Context, id uuid.UUID) (P
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,

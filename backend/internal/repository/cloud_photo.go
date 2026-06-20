@@ -36,7 +36,6 @@ type CloudPhotoDetail struct {
 	SuggestedAnimal     pgtype.Text
 	Confidence          pgtype.Float8
 	Description         pgtype.Text
-	DoodleImageURL      pgtype.Text
 	CompositeImageURL   pgtype.Text
 	ErrorCode           pgtype.Text
 	ErrorMessage        pgtype.Text
@@ -80,7 +79,6 @@ SELECT
     pj.suggested_animal,
     pj.confidence,
     pj.description,
-    pj.doodle_image_url,
     pj.composite_image_url,
     pj.error_code,
     pj.error_message,
@@ -116,7 +114,6 @@ WHERE cp.id = $1
 		&item.SuggestedAnimal,
 		&item.Confidence,
 		&item.Description,
-		&item.DoodleImageURL,
 		&item.CompositeImageURL,
 		&item.ErrorCode,
 		&item.ErrorMessage,

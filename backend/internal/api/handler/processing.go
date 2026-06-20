@@ -59,12 +59,11 @@ func processingJobResponse(job dbgen.ProcessingJob) *gen.ProcessingJob {
 		CompletedAt: apiNilDateTime(job.CompletedAt),
 		CreatedAt:   job.CreatedAt.Time,
 	}
-	if job.SuggestedAnimal.Valid && job.Confidence.Valid && job.DoodleImageUrl.Valid && job.CompositeImageUrl.Valid {
+	if job.SuggestedAnimal.Valid && job.Confidence.Valid && job.CompositeImageUrl.Valid {
 		res.Result.SetTo(gen.ProcessingResult{
 			SuggestedAnimal:   job.SuggestedAnimal.String,
 			Confidence:        float32(job.Confidence.Float64),
 			Description:       apiString(job.Description),
-			DoodleImageURL:    urlValue(job.DoodleImageUrl.String),
 			CompositeImageURL: urlValue(job.CompositeImageUrl.String),
 		})
 	}

@@ -107,7 +107,7 @@ func (s *ProcessingService) run(jobID uuid.UUID, originalImageURL string) {
 		return
 	}
 
-	doodleURL, compositeURL, err := s.writeGeneratedImages(job.ID, result)
+	compositeURL, err := s.writeGeneratedImage(job.ID, result)
 	if err != nil {
 		s.fail(ctx, job.ID, "IMAGE_WRITE_FAILED", "生成画像の保存に失敗しました")
 		return
@@ -118,7 +118,6 @@ func (s *ProcessingService) run(jobID uuid.UUID, originalImageURL string) {
 		SuggestedAnimal:   text(result.SuggestedAnimal, true),
 		Confidence:        pgtype.Float8{Float64: result.Confidence, Valid: true},
 		Description:       text(result.Description, strings.TrimSpace(result.Description) != ""),
-		DoodleImageUrl:    text(doodleURL, true),
 		CompositeImageUrl: text(compositeURL, true),
 	})
 	if err != nil {
@@ -139,27 +138,20 @@ func (s *ProcessingService) fail(ctx context.Context, jobID uuid.UUID, code, mes
 	}
 }
 
-func (s *ProcessingService) writeGeneratedImages(jobID uuid.UUID, result ImageProcessingOutput) (string, string, error) {
+func (s *ProcessingService) writeGeneratedImage(jobID uuid.UUID, result ImageProcessingOutput) (string, error) {
 	dir := filepath.Join(s.uploadsRoot, "processing-jobs", jobID.String())
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return "", "", err
+		return "", err
 	}
 
-	doodleExt := imageExt(result.DoodleMIMEType)
 	compositeExt := imageExt(result.CompositeMIMEType)
-	doodlePath := filepath.Join(dir, "doodle"+doodleExt)
 	compositePath := filepath.Join(dir, "composite"+compositeExt)
 
-	if err := os.WriteFile(doodlePath, result.DoodleImage, 0o644); err != nil {
-		return "", "", err
-	}
 	if err := os.WriteFile(compositePath, result.CompositeImage, 0o644); err != nil {
-		return "", "", err
+		return "", err
 	}
 
-	return "/uploads/processing-jobs/" + jobID.String() + "/doodle" + doodleExt,
-		"/uploads/processing-jobs/" + jobID.String() + "/composite" + compositeExt,
-		nil
+	return "/uploads/processing-jobs/" + jobID.String() + "/composite" + compositeExt, nil
 }
 
 func readImage(path string) ([]byte, string, error) {
@@ -213,8 +205,6 @@ type ImageProcessingOutput struct {
 	SuggestedAnimal   string
 	Confidence        float64
 	Description       string
-	DoodleImage       []byte
-	DoodleMIMEType    string
 	CompositeImage    []byte
 	CompositeMIMEType string
 }
@@ -246,24 +236,17 @@ func (p *NanoBananaProcessor) Process(ctx context.Context, input ImageProcessing
 	}
 	parsed := parseMetadata(metadata.Text())
 
-	doodle, err := p.generate(ctx, input, doodlePrompt(parsed.SuggestedAnimal))
-	if err != nil {
-		return ImageProcessingOutput{}, err
-	}
 	composite, err := p.generate(ctx, input, compositePrompt(parsed.SuggestedAnimal))
 	if err != nil {
 		return ImageProcessingOutput{}, err
 	}
 
-	doodleImage, doodleMIME := generatedImage(doodle, input)
 	compositeImage, compositeMIME := generatedImage(composite, input)
 
 	return ImageProcessingOutput{
 		SuggestedAnimal:   parsed.SuggestedAnimal,
 		Confidence:        parsed.Confidence,
 		Description:       parsed.Description,
-		DoodleImage:       doodleImage,
-		DoodleMIMEType:    doodleMIME,
 		CompositeImage:    compositeImage,
 		CompositeMIMEType: compositeMIME,
 	}, nil
@@ -322,12 +305,8 @@ func (p *NanoBananaProcessor) generate(ctx context.Context, input ImageProcessin
 
 const metadataPrompt = `Analyze this cloud photo. Return only compact JSON with keys suggested_animal, confidence, description. suggested_animal must be a short Japanese animal name. confidence must be a number from 0 to 1. description must be Japanese.`
 
-func doodlePrompt(animal string) string {
-	return fmt.Sprintf("Create a transparent PNG doodle overlay that turns the cloud shape into a cute %s. Keep the background transparent and draw only simple playful line art.", animal)
-}
-
 func compositePrompt(animal string) string {
-	return fmt.Sprintf("Edit the provided cloud photo by overlaying a cute %s doodle that follows the cloud shape. Preserve the original photo as the background.", animal)
+	return fmt.Sprintf("Edit the provided cloud photo by overlaying a cute %s illustration that follows the cloud shape. Preserve the original photo as the background.", animal)
 }
 
 type processingMetadata struct {
