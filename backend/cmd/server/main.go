@@ -50,9 +50,10 @@ func run() error {
 	processor := service.NewNanoBananaProcessor(cfg.NanoBananaAPIKey, cfg.NanoBananaModel, cfg.NanoBananaEndpoint)
 	processingService := service.NewProcessingService(cloudPhotoService, processingJobs, processor, cfg.UploadsDir)
 	animalService := service.NewAnimalService(animals, cloudPhotoService)
+	battleService := service.NewBattleService(animalService)
 
 	apiServer, err := gen.NewServer(
-		handler.New(auth, cloudPhotoService, processingService, animalService),
+		handler.New(auth, cloudPhotoService, processingService, animalService, battleService),
 		middleware.NewSecurityHandler(auth),
 		gen.WithErrorHandler(handler.ErrorHandler),
 	)
