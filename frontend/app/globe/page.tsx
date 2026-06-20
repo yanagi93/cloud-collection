@@ -1,5 +1,9 @@
+"use client";
+
 import CloudGlobe from "../../component/CloudGlobe";
 import AuthGuard from "@/component/AuthGuard";
+import { Button, Card } from "pixel-retroui";
+import { useRouter } from "next/navigation";
 
 type CloudPhoto = {
     id: string;
@@ -20,6 +24,8 @@ const samplePhotos: CloudPhoto[] = [
 ];
 
 export default function GlobePage() {
+  const router = useRouter();
+
     return (
       <AuthGuard>
         <main className="min-h-screen overflow-hidden bg-sky-100 px-4 py-6">
@@ -33,6 +39,16 @@ export default function GlobePage() {
                 </p>
 
                 <CloudGlobe photos={samplePhotos} />
+            </div>
+
+            {/* 戻るボタン */}
+            <div className="flex justify-center mt-12">
+                <Button
+                  onClick={() => router.push("/home")}
+                  className="font-minecraft"
+                >
+                  🏠 ホームへ戻る
+                </Button>
             </div>
         </main>
       </AuthGuard>

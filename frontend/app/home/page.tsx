@@ -40,6 +40,24 @@ export default function HomePage() {
           ☁️
         </div>
 
+        <div
+        onClick={() => router.push("/profile")}
+        className="
+          absolute top-6 right-6 z-20
+          w-16 h-16
+          bg-yellow-200
+          border-4 border-black
+          rounded-full
+          flex items-center justify-center
+          text-3xl
+          cursor-pointer
+          hover:scale-110
+          transition-transform
+        "
+      >
+        🧑‍🚀
+      </div>
+
         {/* メインメニュー */}
         <Card className="w-[700px] p-10">
           <div className="text-center mb-8">
@@ -69,16 +87,9 @@ export default function HomePage() {
 
             <Button
               className="font-minecraft text-lg"
-              onClick={() => router.push("/battle")}
+              onClick={() => router.push("/globe")}
             >
-              ⚔️ バトルする
-            </Button>
-
-            <Button
-              className="font-minecraft text-lg"
-              onClick={() => router.push("/profile")}
-            >
-              👤 マイページ
+              🌎 タイムラインを見る
             </Button>
 
             <Button

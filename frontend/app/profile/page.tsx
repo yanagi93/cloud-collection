@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import AuthGuard from "@/component/AuthGuard";
+import { Button, Card } from "pixel-retroui";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -14,9 +15,6 @@ export default function ProfilePage() {
 
   const [cloudCount, setCloudCount] = useState(0);
   const [photoCount, setPhotoCount] = useState(0);
-
-  // APIに存在しないので仮置き
-  const battleWin = 5;
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -114,17 +112,31 @@ export default function ProfilePage() {
   return (
   <AuthGuard>
     <main className="min-h-screen bg-gradient-to-b from-sky-200 to-white flex items-center justify-center">
-      <div className="bg-white/90 border-4 border-sky-400 shadow-2xl rounded-2xl w-[450px] p-6">
+      <Card
+        bg="#fefcd0"
+        className="w-[500px] p-8"
+      >
 
-        <h1 className="text-3xl font-bold text-center mb-6">
-          ⚙️ ステータス
-        </h1>
-
+      <h1 className="font-minecraft text-4xl text-center mb-6">
+        ☁️ マイページ
+      </h1>
         <div className="flex flex-col items-center mb-6">
-          <div className="w-20 h-20 bg-sky-300 rounded-full flex items-center justify-center text-3xl border-2 border-sky-500">
-            ☁️
-          </div>
-
+        <div
+          className="
+            w-28
+            h-28
+            bg-sky-300
+            border-4
+            border-black
+            flex
+            items-center
+            justify-center
+            text-6xl
+            mx-auto
+          "
+        >
+          ☁️
+        </div>
           {editMode ? (
             <div className="flex gap-2 mt-3">
               <input
@@ -155,80 +167,62 @@ export default function ProfilePage() {
             {user?.email ?? ""}
           </p>
 
-          <p className="mt-2 text-sm font-semibold text-sky-700">
-            {title}
-          </p>
+          <div
+            className="
+              mt-3
+              px-4
+              py-1
+              bg-yellow-300
+              border-2
+              border-black
+              font-bold
+            "
+          >
+            🏅 {title}
+          </div>
         </div>
 
-        <div className="border-t pt-4 space-y-3 text-sm">
+        <Card className="p-4 mt-4">
+          <h2 className="font-bold text-center mb-3">
+            📊 プレイヤーデータ
+          </h2>
+
           <div className="flex justify-between">
             <span>☁️ 図鑑登録</span>
             <span>{cloudCount} 種類</span>
           </div>
 
           <div className="flex justify-between">
-            <span>⚔️ バトル勝利</span>
-            <span>{battleWin} 回</span>
-          </div>
-
-          <div className="flex justify-between">
             <span>📷 撮影した雲</span>
             <span>{photoCount} 枚</span>
           </div>
-        </div>
+        </Card>
 
-        <div className="mt-6 space-y-3">
-          <button
+        <div className="flex flex-col gap-5">
+          <Button
             onClick={() => router.push("/home")}
-            className="
-              w-full
-              bg-sky-500
-              text-white
-              py-3
-              rounded-xl
-              font-bold
-              hover:bg-sky-600
-              transition
-            "
+            className="font-minecraft text-lg"
           >
             🏠 ホームへ戻る
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={() =>
               router.push("/collection")
             }
-            className="
-              w-full
-              bg-yellow-500
-              text-white
-              py-3
-              rounded-xl
-              font-bold
-              hover:bg-yellow-600
-              transition
-            "
+            className="font-minecraft text-lg"
           >
             ☁️ 図鑑を見る
-          </button>
+          </Button>
 
-          <button
-            onClick={() => router.push("/battle")}
-            className="
-              w-full
-              bg-red-500
-              text-white
-              py-3
-              rounded-xl
-              font-bold
-              hover:bg-red-600
-              transition
-            "
+          <Button
+            onClick={() => router.push("/globe")}
+            className="font-minecraft text-lg"
           >
-            ⚔️ バトルへ
-          </button>
+            🌎 タイムラインを見る
+          </Button>
         </div>
-      </div>
+      </Card>
     </main>
   </AuthGuard>
   );
