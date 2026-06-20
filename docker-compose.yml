@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+
+  postgres:
+    image: postgres:17-alpine
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/sql/schema/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloud_collection -d cloud_collection"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  postgres-data:
