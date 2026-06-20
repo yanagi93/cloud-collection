@@ -21,7 +21,6 @@ type Animal struct {
 	// 連想された動物種別.
 	Species          string `json:"species"`
 	OriginalImageURL OptURI `json:"original_image_url"`
-	DoodleImageURL   OptURI `json:"doodle_image_url"`
 	// コレクション表示用の合成画像.
 	CompositeImageURL url.URL    `json:"composite_image_url"`
 	Confidence        OptFloat32 `json:"confidence"`
@@ -61,11 +60,6 @@ func (s *Animal) GetSpecies() string {
 // GetOriginalImageURL returns the value of OriginalImageURL.
 func (s *Animal) GetOriginalImageURL() OptURI {
 	return s.OriginalImageURL
-}
-
-// GetDoodleImageURL returns the value of DoodleImageURL.
-func (s *Animal) GetDoodleImageURL() OptURI {
-	return s.DoodleImageURL
 }
 
 // GetCompositeImageURL returns the value of CompositeImageURL.
@@ -131,11 +125,6 @@ func (s *Animal) SetSpecies(val string) {
 // SetOriginalImageURL sets the value of OriginalImageURL.
 func (s *Animal) SetOriginalImageURL(val OptURI) {
 	s.OriginalImageURL = val
-}
-
-// SetDoodleImageURL sets the value of DoodleImageURL.
-func (s *Animal) SetDoodleImageURL(val OptURI) {
-	s.DoodleImageURL = val
 }
 
 // SetCompositeImageURL sets the value of CompositeImageURL.
@@ -1715,9 +1704,7 @@ type ProcessingResult struct {
 	Confidence float32 `json:"confidence"`
 	// AI による雲の形の説明.
 	Description OptString `json:"description"`
-	// 生成された落書きレイヤー画像 URL（透過 PNG）.
-	DoodleImageURL url.URL `json:"doodle_image_url"`
-	// オリジナル写真に落書きを合成した画像 URL.
+	// オリジナル写真に動物イラストを合成した画像 URL.
 	CompositeImageURL url.URL `json:"composite_image_url"`
 }
 
@@ -1734,11 +1721,6 @@ func (s *ProcessingResult) GetConfidence() float32 {
 // GetDescription returns the value of Description.
 func (s *ProcessingResult) GetDescription() OptString {
 	return s.Description
-}
-
-// GetDoodleImageURL returns the value of DoodleImageURL.
-func (s *ProcessingResult) GetDoodleImageURL() url.URL {
-	return s.DoodleImageURL
 }
 
 // GetCompositeImageURL returns the value of CompositeImageURL.
@@ -1761,11 +1743,6 @@ func (s *ProcessingResult) SetDescription(val OptString) {
 	s.Description = val
 }
 
-// SetDoodleImageURL sets the value of DoodleImageURL.
-func (s *ProcessingResult) SetDoodleImageURL(val url.URL) {
-	s.DoodleImageURL = val
-}
-
 // SetCompositeImageURL sets the value of CompositeImageURL.
 func (s *ProcessingResult) SetCompositeImageURL(val url.URL) {
 	s.CompositeImageURL = val
@@ -1773,7 +1750,7 @@ func (s *ProcessingResult) SetCompositeImageURL(val url.URL) {
 
 //   - pending: アップロード済み、未処理
 //   - processing: AI 解析中
-//   - completed: 解析・落書き生成完了
+//   - completed: 解析・合成画像生成完了
 //   - failed: 解析失敗
 //
 // Ref: #/components/schemas/ProcessingStatus

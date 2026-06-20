@@ -148,7 +148,6 @@ SELECT
     pj.suggested_animal,
     pj.confidence,
     pj.description,
-    pj.doodle_image_url,
     pj.composite_image_url,
     pj.error_code,
     pj.error_message,
@@ -158,7 +157,7 @@ SELECT
     a.id AS animal_id
 FROM cloud_photos cp
 LEFT JOIN LATERAL (
-    SELECT id, photo_id, status, suggested_animal, confidence, description, doodle_image_url, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
+    SELECT id, photo_id, status, suggested_animal, confidence, description, composite_image_url, error_code, error_message, started_at, completed_at, created_at, updated_at
     FROM processing_jobs
     WHERE photo_id = cp.id
     ORDER BY created_at DESC
@@ -189,7 +188,6 @@ type GetCloudPhotoDetailByIDRow struct {
 	SuggestedAnimal     pgtype.Text        `db:"suggested_animal" json:"suggested_animal"`
 	Confidence          pgtype.Float8      `db:"confidence" json:"confidence"`
 	Description         pgtype.Text        `db:"description" json:"description"`
-	DoodleImageUrl      pgtype.Text        `db:"doodle_image_url" json:"doodle_image_url"`
 	CompositeImageUrl   pgtype.Text        `db:"composite_image_url" json:"composite_image_url"`
 	ErrorCode           pgtype.Text        `db:"error_code" json:"error_code"`
 	ErrorMessage        pgtype.Text        `db:"error_message" json:"error_message"`
@@ -217,7 +215,6 @@ func (q *Queries) GetCloudPhotoDetailByID(ctx context.Context, arg GetCloudPhoto
 		&i.SuggestedAnimal,
 		&i.Confidence,
 		&i.Description,
-		&i.DoodleImageUrl,
 		&i.CompositeImageUrl,
 		&i.ErrorCode,
 		&i.ErrorMessage,

@@ -42,10 +42,17 @@ func run() error {
 
 	queries := dbgen.New(pool)
 	users := repository.NewUserRepository(queries)
+	cloudPhotos := repository.NewCloudPhotoRepository(pool, queries)
+	processingJobs := repository.NewProcessingJobRepository(queries)
+	animals := repository.NewAnimalRepository(queries)
 	auth := service.NewAuthService(users, cfg.JWTSecret, cfg.JWTExpiresIn)
+	cloudPhotoService := service.NewCloudPhotoService(cloudPhotos, cfg.UploadsDir)
+	processor := service.NewNanoBananaProcessor(cfg.NanoBananaAPIKey, cfg.NanoBananaModel, cfg.NanoBananaEndpoint)
+	processingService := service.NewProcessingService(cloudPhotoService, processingJobs, processor, cfg.UploadsDir)
+	animalService := service.NewAnimalService(animals, cloudPhotoService)
 
 	apiServer, err := gen.NewServer(
-		handler.New(auth),
+		handler.New(auth, cloudPhotoService, processingService, animalService),
 		middleware.NewSecurityHandler(auth),
 		gen.WithErrorHandler(handler.ErrorHandler),
 	)
@@ -53,9 +60,13 @@ func run() error {
 		return err
 	}
 
+	mux := http.NewServeMux()
+	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(cfg.UploadsDir))))
+	mux.Handle("/", apiServer)
+
 	server := &http.Server{
 		Addr:    cfg.HTTPAddr,
-		Handler: apiServer,
+		Handler: mux,
 	}
 
 	errCh := make(chan error, 1)

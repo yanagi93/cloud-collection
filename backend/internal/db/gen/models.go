@@ -64,7 +64,6 @@ type Animal struct {
 	Name              string             `db:"name" json:"name"`
 	Species           string             `db:"species" json:"species"`
 	OriginalImageUrl  string             `db:"original_image_url" json:"original_image_url"`
-	DoodleImageUrl    string             `db:"doodle_image_url" json:"doodle_image_url"`
 	CompositeImageUrl string             `db:"composite_image_url" json:"composite_image_url"`
 	Confidence        float64            `db:"confidence" json:"confidence"`
 	Description       pgtype.Text        `db:"description" json:"description"`
@@ -94,7 +93,6 @@ type ProcessingJob struct {
 	SuggestedAnimal   pgtype.Text        `db:"suggested_animal" json:"suggested_animal"`
 	Confidence        pgtype.Float8      `db:"confidence" json:"confidence"`
 	Description       pgtype.Text        `db:"description" json:"description"`
-	DoodleImageUrl    pgtype.Text        `db:"doodle_image_url" json:"doodle_image_url"`
 	CompositeImageUrl pgtype.Text        `db:"composite_image_url" json:"composite_image_url"`
 	ErrorCode         pgtype.Text        `db:"error_code" json:"error_code"`
 	ErrorMessage      pgtype.Text        `db:"error_message" json:"error_message"`
