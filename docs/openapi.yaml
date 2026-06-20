@@ -438,13 +438,13 @@ paths:
                       challenger:
                         hp: 100
                         attack: 10
+                        evasion: 5
                         defense: 5
-                        accuracy: 80
                       defender:
                         hp: 120
                         attack: 8
+                        evasion: 6
                         defense: 8
-                        accuracy: 90
                     winner: challenger
                     battle_log:
                       - actor: challenger
@@ -762,7 +762,7 @@ components:
 
     CreateAnimalRequest:
       type: object
-      required: [photo_id, name]
+      required: [photo_id, name, hp, attack, evasion, defense]
       properties:
         photo_id:
           type: string
@@ -782,6 +782,22 @@ components:
           type: string
           maxLength: 30
           description: use_suggested_animal=false の場合に手動指定する動物種別
+        hp:
+          type: integer
+          description: バトルで使用する HP
+          example: 100
+        attack:
+          type: integer
+          description: バトルで使用する攻撃力
+          example: 10
+        evasion:
+          type: integer
+          description: バトルで使用する回避力
+          example: 5
+        defense:
+          type: integer
+          description: バトルで使用する防御力
+          example: 5
 
     UpdateAnimalRequest:
       type: object
@@ -803,6 +819,10 @@ components:
         - name
         - species
         - composite_image_url
+        - hp
+        - attack
+        - evasion
+        - defense
         - created_at
       properties:
         id:
@@ -837,6 +857,22 @@ components:
         description:
           type: string
           description: AI による雲の形の説明
+        hp:
+          type: integer
+          description: バトルで使用する HP
+          example: 100
+        attack:
+          type: integer
+          description: バトルで使用する攻撃力
+          example: 10
+        evasion:
+          type: integer
+          description: バトルで使用する回避力
+          example: 5
+        defense:
+          type: integer
+          description: バトルで使用する防御力
+          example: 5
         captured_at:
           type: string
           format: date-time
@@ -901,7 +937,7 @@ components:
 
     BattleStatus:
       type: object
-      required: [hp, attack, defense, accuracy]
+      required: [hp, attack, evasion, defense]
       properties:
         hp:
           type: integer
@@ -909,13 +945,13 @@ components:
         attack:
           type: integer
           example: 10
+        evasion:
+          type: integer
+          description: 回避力
+          example: 5
         defense:
           type: integer
           example: 5
-        accuracy:
-          type: integer
-          description: 攻撃命中率（%）
-          example: 80
 
     BattleParticipantRole:
       type: string

@@ -25,11 +25,19 @@ type Animal struct {
 	CompositeImageURL url.URL    `json:"composite_image_url"`
 	Confidence        OptFloat32 `json:"confidence"`
 	// AI による雲の形の説明.
-	Description OptString         `json:"description"`
-	CapturedAt  OptNilDateTime    `json:"captured_at"`
-	Location    OptNilGeoLocation `json:"location"`
-	CreatedAt   time.Time         `json:"created_at"`
-	UpdatedAt   OptDateTime       `json:"updated_at"`
+	Description OptString `json:"description"`
+	// バトルで使用する HP.
+	Hp int `json:"hp"`
+	// バトルで使用する攻撃力.
+	Attack int `json:"attack"`
+	// バトルで使用する回避力.
+	Evasion int `json:"evasion"`
+	// バトルで使用する防御力.
+	Defense    int               `json:"defense"`
+	CapturedAt OptNilDateTime    `json:"captured_at"`
+	Location   OptNilGeoLocation `json:"location"`
+	CreatedAt  time.Time         `json:"created_at"`
+	UpdatedAt  OptDateTime       `json:"updated_at"`
 }
 
 // GetID returns the value of ID.
@@ -75,6 +83,26 @@ func (s *Animal) GetConfidence() OptFloat32 {
 // GetDescription returns the value of Description.
 func (s *Animal) GetDescription() OptString {
 	return s.Description
+}
+
+// GetHp returns the value of Hp.
+func (s *Animal) GetHp() int {
+	return s.Hp
+}
+
+// GetAttack returns the value of Attack.
+func (s *Animal) GetAttack() int {
+	return s.Attack
+}
+
+// GetEvasion returns the value of Evasion.
+func (s *Animal) GetEvasion() int {
+	return s.Evasion
+}
+
+// GetDefense returns the value of Defense.
+func (s *Animal) GetDefense() int {
+	return s.Defense
 }
 
 // GetCapturedAt returns the value of CapturedAt.
@@ -140,6 +168,26 @@ func (s *Animal) SetConfidence(val OptFloat32) {
 // SetDescription sets the value of Description.
 func (s *Animal) SetDescription(val OptString) {
 	s.Description = val
+}
+
+// SetHp sets the value of Hp.
+func (s *Animal) SetHp(val int) {
+	s.Hp = val
+}
+
+// SetAttack sets the value of Attack.
+func (s *Animal) SetAttack(val int) {
+	s.Attack = val
+}
+
+// SetEvasion sets the value of Evasion.
+func (s *Animal) SetEvasion(val int) {
+	s.Evasion = val
+}
+
+// SetDefense sets the value of Defense.
+func (s *Animal) SetDefense(val int) {
+	s.Defense = val
 }
 
 // SetCapturedAt sets the value of CapturedAt.
@@ -483,11 +531,11 @@ func (*BattleResult) createBattleRes() {}
 
 // Ref: #/components/schemas/BattleStatus
 type BattleStatus struct {
-	Hp      int `json:"hp"`
-	Attack  int `json:"attack"`
+	Hp     int `json:"hp"`
+	Attack int `json:"attack"`
+	// 回避力.
+	Evasion int `json:"evasion"`
 	Defense int `json:"defense"`
-	// 攻撃命中率（%）.
-	Accuracy int `json:"accuracy"`
 }
 
 // GetHp returns the value of Hp.
@@ -500,14 +548,14 @@ func (s *BattleStatus) GetAttack() int {
 	return s.Attack
 }
 
+// GetEvasion returns the value of Evasion.
+func (s *BattleStatus) GetEvasion() int {
+	return s.Evasion
+}
+
 // GetDefense returns the value of Defense.
 func (s *BattleStatus) GetDefense() int {
 	return s.Defense
-}
-
-// GetAccuracy returns the value of Accuracy.
-func (s *BattleStatus) GetAccuracy() int {
-	return s.Accuracy
 }
 
 // SetHp sets the value of Hp.
@@ -520,14 +568,14 @@ func (s *BattleStatus) SetAttack(val int) {
 	s.Attack = val
 }
 
+// SetEvasion sets the value of Evasion.
+func (s *BattleStatus) SetEvasion(val int) {
+	s.Evasion = val
+}
+
 // SetDefense sets the value of Defense.
 func (s *BattleStatus) SetDefense(val int) {
 	s.Defense = val
-}
-
-// SetAccuracy sets the value of Accuracy.
-func (s *BattleStatus) SetAccuracy(val int) {
-	s.Accuracy = val
 }
 
 // Ref: #/components/schemas/BattleTurnLog
@@ -751,6 +799,14 @@ type CreateAnimalRequest struct {
 	UseSuggestedAnimal OptBool `json:"use_suggested_animal"`
 	// Use_suggested_animal=false の場合に手動指定する動物種別.
 	Species OptString `json:"species"`
+	// バトルで使用する HP.
+	Hp int `json:"hp"`
+	// バトルで使用する攻撃力.
+	Attack int `json:"attack"`
+	// バトルで使用する回避力.
+	Evasion int `json:"evasion"`
+	// バトルで使用する防御力.
+	Defense int `json:"defense"`
 }
 
 // GetPhotoID returns the value of PhotoID.
@@ -773,6 +829,26 @@ func (s *CreateAnimalRequest) GetSpecies() OptString {
 	return s.Species
 }
 
+// GetHp returns the value of Hp.
+func (s *CreateAnimalRequest) GetHp() int {
+	return s.Hp
+}
+
+// GetAttack returns the value of Attack.
+func (s *CreateAnimalRequest) GetAttack() int {
+	return s.Attack
+}
+
+// GetEvasion returns the value of Evasion.
+func (s *CreateAnimalRequest) GetEvasion() int {
+	return s.Evasion
+}
+
+// GetDefense returns the value of Defense.
+func (s *CreateAnimalRequest) GetDefense() int {
+	return s.Defense
+}
+
 // SetPhotoID sets the value of PhotoID.
 func (s *CreateAnimalRequest) SetPhotoID(val uuid.UUID) {
 	s.PhotoID = val
@@ -791,6 +867,26 @@ func (s *CreateAnimalRequest) SetUseSuggestedAnimal(val OptBool) {
 // SetSpecies sets the value of Species.
 func (s *CreateAnimalRequest) SetSpecies(val OptString) {
 	s.Species = val
+}
+
+// SetHp sets the value of Hp.
+func (s *CreateAnimalRequest) SetHp(val int) {
+	s.Hp = val
+}
+
+// SetAttack sets the value of Attack.
+func (s *CreateAnimalRequest) SetAttack(val int) {
+	s.Attack = val
+}
+
+// SetEvasion sets the value of Evasion.
+func (s *CreateAnimalRequest) SetEvasion(val int) {
+	s.Evasion = val
+}
+
+// SetDefense sets the value of Defense.
+func (s *CreateAnimalRequest) SetDefense(val int) {
+	s.Defense = val
 }
 
 type CreateAnimalUnauthorized Error

@@ -9,6 +9,10 @@ INSERT INTO animals (
     composite_image_url,
     confidence,
     description,
+    hp,
+    attack,
+    evasion,
+    defense,
     captured_at,
     latitude,
     longitude
@@ -23,6 +27,10 @@ SELECT
     pj.composite_image_url,
     pj.confidence,
     pj.description,
+    sqlc.arg('hp'),
+    sqlc.arg('attack'),
+    sqlc.arg('evasion'),
+    sqlc.arg('defense'),
     cp.captured_at,
     cp.latitude,
     cp.longitude

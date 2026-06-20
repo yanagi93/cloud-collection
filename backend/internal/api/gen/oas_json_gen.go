@@ -66,6 +66,22 @@ func (s *Animal) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		e.FieldStart("hp")
+		e.Int(s.Hp)
+	}
+	{
+		e.FieldStart("attack")
+		e.Int(s.Attack)
+	}
+	{
+		e.FieldStart("evasion")
+		e.Int(s.Evasion)
+	}
+	{
+		e.FieldStart("defense")
+		e.Int(s.Defense)
+	}
+	{
 		if s.CapturedAt.Set {
 			e.FieldStart("captured_at")
 			s.CapturedAt.Encode(e, json.EncodeDateTime)
@@ -89,7 +105,7 @@ func (s *Animal) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAnimal = [13]string{
+var jsonFieldsNameOfAnimal = [17]string{
 	0:  "id",
 	1:  "user_id",
 	2:  "photo_id",
@@ -99,10 +115,14 @@ var jsonFieldsNameOfAnimal = [13]string{
 	6:  "composite_image_url",
 	7:  "confidence",
 	8:  "description",
-	9:  "captured_at",
-	10: "location",
-	11: "created_at",
-	12: "updated_at",
+	9:  "hp",
+	10: "attack",
+	11: "evasion",
+	12: "defense",
+	13: "captured_at",
+	14: "location",
+	15: "created_at",
+	16: "updated_at",
 }
 
 // Decode decodes Animal from json.
@@ -110,7 +130,7 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode Animal to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -216,6 +236,54 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
+		case "hp":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Hp = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hp\"")
+			}
+		case "attack":
+			requiredBitSet[1] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Attack = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"attack\"")
+			}
+		case "evasion":
+			requiredBitSet[1] |= 1 << 3
+			if err := func() error {
+				v, err := d.Int()
+				s.Evasion = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"evasion\"")
+			}
+		case "defense":
+			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int()
+				s.Defense = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"defense\"")
+			}
 		case "captured_at":
 			if err := func() error {
 				s.CapturedAt.Reset()
@@ -237,7 +305,7 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"location\"")
 			}
 		case "created_at":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -267,9 +335,10 @@ func (s *Animal) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [3]uint8{
 		0b01011111,
-		0b00001000,
+		0b10011110,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -1105,20 +1174,20 @@ func (s *BattleStatus) encodeFields(e *jx.Encoder) {
 		e.Int(s.Attack)
 	}
 	{
-		e.FieldStart("defense")
-		e.Int(s.Defense)
+		e.FieldStart("evasion")
+		e.Int(s.Evasion)
 	}
 	{
-		e.FieldStart("accuracy")
-		e.Int(s.Accuracy)
+		e.FieldStart("defense")
+		e.Int(s.Defense)
 	}
 }
 
 var jsonFieldsNameOfBattleStatus = [4]string{
 	0: "hp",
 	1: "attack",
-	2: "defense",
-	3: "accuracy",
+	2: "evasion",
+	3: "defense",
 }
 
 // Decode decodes BattleStatus from json.
@@ -1154,8 +1223,20 @@ func (s *BattleStatus) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"attack\"")
 			}
-		case "defense":
+		case "evasion":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Int()
+				s.Evasion = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"evasion\"")
+			}
+		case "defense":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int()
 				s.Defense = int(v)
@@ -1165,18 +1246,6 @@ func (s *BattleStatus) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"defense\"")
-			}
-		case "accuracy":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Int()
-				s.Accuracy = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"accuracy\"")
 			}
 		default:
 			return d.Skip()
@@ -1867,13 +1936,33 @@ func (s *CreateAnimalRequest) encodeFields(e *jx.Encoder) {
 			s.Species.Encode(e)
 		}
 	}
+	{
+		e.FieldStart("hp")
+		e.Int(s.Hp)
+	}
+	{
+		e.FieldStart("attack")
+		e.Int(s.Attack)
+	}
+	{
+		e.FieldStart("evasion")
+		e.Int(s.Evasion)
+	}
+	{
+		e.FieldStart("defense")
+		e.Int(s.Defense)
+	}
 }
 
-var jsonFieldsNameOfCreateAnimalRequest = [4]string{
+var jsonFieldsNameOfCreateAnimalRequest = [8]string{
 	0: "photo_id",
 	1: "name",
 	2: "use_suggested_animal",
 	3: "species",
+	4: "hp",
+	5: "attack",
+	6: "evasion",
+	7: "defense",
 }
 
 // Decode decodes CreateAnimalRequest from json.
@@ -1930,6 +2019,54 @@ func (s *CreateAnimalRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"species\"")
 			}
+		case "hp":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Int()
+				s.Hp = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"hp\"")
+			}
+		case "attack":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Int()
+				s.Attack = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"attack\"")
+			}
+		case "evasion":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Int()
+				s.Evasion = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"evasion\"")
+			}
+		case "defense":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Int()
+				s.Defense = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"defense\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -1940,7 +2077,7 @@ func (s *CreateAnimalRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b11110011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
