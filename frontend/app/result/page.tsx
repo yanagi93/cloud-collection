@@ -296,10 +296,10 @@ export default function ResultPage() {
                         </Button>
 
                         <Button
-                            onClick={() => router.push("/home")}
+                            onClick={() => router.push("/cloud-register")}
                             className="h-16 flex items-center justify-center bg-white text-black font-bold text-lg"
                         >
-                            🏠 ホームへ
+                            🏠 登録画面へ
                         </Button>
                     </div>
                 </Card>
