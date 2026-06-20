@@ -14,13 +14,15 @@ type Handler struct {
 	auth        *service.AuthService
 	cloudPhotos *service.CloudPhotoService
 	processing  *service.ProcessingService
+	animals     *service.AnimalService
 }
 
-func New(auth *service.AuthService, cloudPhotos *service.CloudPhotoService, processing *service.ProcessingService) *Handler {
+func New(auth *service.AuthService, cloudPhotos *service.CloudPhotoService, processing *service.ProcessingService, animals *service.AnimalService) *Handler {
 	return &Handler{
 		auth:        auth,
 		cloudPhotos: cloudPhotos,
 		processing:  processing,
+		animals:     animals,
 	}
 }
 

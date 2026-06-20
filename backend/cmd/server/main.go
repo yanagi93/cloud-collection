@@ -44,13 +44,15 @@ func run() error {
 	users := repository.NewUserRepository(queries)
 	cloudPhotos := repository.NewCloudPhotoRepository(pool, queries)
 	processingJobs := repository.NewProcessingJobRepository(queries)
+	animals := repository.NewAnimalRepository(queries)
 	auth := service.NewAuthService(users, cfg.JWTSecret, cfg.JWTExpiresIn)
 	cloudPhotoService := service.NewCloudPhotoService(cloudPhotos, cfg.UploadsDir)
 	processor := service.NewNanoBananaProcessor(cfg.NanoBananaAPIKey, cfg.NanoBananaModel, cfg.NanoBananaEndpoint)
 	processingService := service.NewProcessingService(cloudPhotoService, processingJobs, processor, cfg.UploadsDir)
+	animalService := service.NewAnimalService(animals, cloudPhotoService)
 
 	apiServer, err := gen.NewServer(
-		handler.New(auth, cloudPhotoService, processingService),
+		handler.New(auth, cloudPhotoService, processingService, animalService),
 		middleware.NewSecurityHandler(auth),
 		gen.WithErrorHandler(handler.ErrorHandler),
 	)
