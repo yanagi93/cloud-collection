@@ -127,96 +127,153 @@ export default function CloudRegisterPage() {
     }
 
     return (
-        <main className="relative min-h-screen bg-gradient-to-b from-sky-300 to-sky-100 p-6 overflow-hidden">
+        <main className="relative min-h-screen bg-gradient-to-b from-sky-300 to-sky-100 px-4 py-5 overflow-hidden">
             {rarity >= 4 && (
                 <>
-                    <div className="absolute top-10 left-10 text-4xl animate-bounce">
+                    <div className="absolute top-8 left-8 text-5xl animate-bounce pointer-events-none">
                         ✨
                     </div>
 
-                    <div className="absolute top-20 right-20 text-5xl animate-pulse">
+                    <div className="absolute top-16 right-12 text-6xl animate-pulse pointer-events-none">
                         ⭐
                     </div>
 
-                    <div className="absolute bottom-20 left-1/4 text-4xl animate-bounce">
+                    <div className="absolute bottom-20 left-16 text-5xl animate-bounce pointer-events-none">
                         ✨
                     </div>
 
-                    <div className="absolute bottom-32 right-1/4 text-5xl animate-pulse">
+                    <div className="absolute bottom-28 right-16 text-6xl animate-pulse pointer-events-none">
                         ⭐
+                    </div>
+
+                    <div className="absolute top-1/2 left-8 text-4xl animate-pulse pointer-events-none">
+                        🌟
+                    </div>
+
+                    <div className="absolute top-1/3 right-8 text-4xl animate-bounce pointer-events-none">
+                        ✨
                     </div>
                 </>
             )}
 
             {rarity === 5 && (
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-1/4 left-1/4 text-6xl animate-pulse">
+                    <div className="absolute top-1/4 left-1/4 text-7xl animate-pulse">
                         🌈
                     </div>
 
-                    <div className="absolute top-1/3 right-1/4 text-5xl animate-bounce">
+                    <div className="absolute top-1/3 right-1/4 text-6xl animate-bounce">
                         ✨
                     </div>
 
-                    <div className="absolute bottom-1/4 left-1/3 text-5xl animate-pulse">
+                    <div className="absolute bottom-1/4 left-1/3 text-6xl animate-pulse">
                         ⭐
                     </div>
 
-                    <div className="absolute bottom-1/3 right-1/3 text-6xl animate-bounce">
+                    <div className="absolute bottom-1/3 right-1/3 text-7xl animate-bounce">
                         🌈
+                    </div>
+
+                    <div className="absolute top-12 left-1/2 text-5xl animate-pulse">
+                        👑
+                    </div>
+
+                    <div className="absolute bottom-12 left-1/2 text-5xl animate-bounce">
+                        💫
                     </div>
                 </div>
             )}
 
-            <div className="mx-auto max-w-6xl">
-                <div className="text-center mb-8">
-                    <h1 className="font-minecraft text-4xl mb-3">
+            <div className="mx-auto max-w-4xl relative z-10">
+                <div className="mb-4 text-center">
+                    <h1 className="font-minecraft text-3xl mb-2">
                         ☁️ 図鑑に登録
                     </h1>
 
-                    <p className="font-minecraft text-sm">
-                        キャラの姿と雲値を見ながら、名前を決めよう
+                    <p className="font-minecraft text-xs">
+                        名前を決めて雲モンスターを仲間にしよう
                     </p>
                 </div>
 
                 <Card
                     bg={rarityBg}
-                    className="p-6 border-4 border-black shadow-[8px_8px_0px_#000]"
+                    className={`
+            p-4
+            border-4
+            border-black
+            shadow-[6px_6px_0px_#000]
+            ${rarity >= 4
+                            ? "shadow-yellow-300"
+                            : ""
+                        }
+          `}
                 >
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-5">
                         <section>
-                            <Card className="p-4 mb-5 bg-white">
-                                <h2 className="font-minecraft text-xl text-center mb-4">
-                                    ✨ 変化後の姿
-                                </h2>
+                            <Card className="p-3 bg-white">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h2 className="font-minecraft text-lg">
+                                        ✨ 変化後
+                                    </h2>
 
-                                <div className="border-4 border-black bg-sky-100 rounded overflow-hidden">
+                                    <span className="text-xs font-bold">
+                                        {Math.round(confidence * 100)}%
+                                    </span>
+                                </div>
+
+                                <div
+                                    className={`
+                    border-4
+                    border-black
+                    bg-sky-100
+                    rounded
+                    overflow-hidden
+                    ${rarity >= 4
+                                            ? "shadow-[0_0_18px_rgba(250,204,21,0.8)]"
+                                            : ""
+                                        }
+                  `}
+                                >
                                     <img
                                         src={pendingAnimal.compositeImageUrl}
                                         alt="変化後の雲モンスター"
-                                        className="w-full h-80 object-cover"
+                                        className="w-full h-64 object-cover"
                                     />
                                 </div>
-                            </Card>
 
-                            <Card className="p-4 bg-white">
-                                <h2 className="font-minecraft text-lg text-center mb-3">
-                                    📷 元の雲
-                                </h2>
+                                <div className="mt-3 flex gap-3">
+                                    <div className="w-24 shrink-0">
+                                        <p className="text-[10px] font-bold mb-1 text-center">
+                                            元の雲
+                                        </p>
 
-                                <div className="border-2 border-black bg-sky-100 rounded overflow-hidden">
-                                    <img
-                                        src={pendingAnimal.originalImageUrl}
-                                        alt="元の雲"
-                                        className="w-full h-44 object-cover"
-                                    />
+                                        <div className="border-2 border-black bg-sky-100 rounded overflow-hidden">
+                                            <img
+                                                src={pendingAnimal.originalImageUrl}
+                                                alt="元の雲"
+                                                className="w-full h-16 object-cover"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-xs font-bold">
+                                            種族：{pendingAnimal.suggestedAnimal}
+                                        </p>
+
+                                        {pendingAnimal.description && (
+                                            <p className="mt-1 text-xs leading-relaxed text-gray-700">
+                                                {pendingAnimal.description}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </Card>
                         </section>
 
-                        <section>
-                            <Card className="p-5 mb-5 bg-white">
-                                <h2 className="font-minecraft text-xl text-center mb-4">
+                        <section className="space-y-3">
+                            <Card className="p-4 bg-white">
+                                <h2 className="font-minecraft text-lg text-center mb-3">
                                     名前をつける
                                 </h2>
 
@@ -230,10 +287,10 @@ export default function CloudRegisterPage() {
                     border-4
                     border-black
                     bg-white
-                    px-4
-                    py-3
+                    px-3
+                    py-2
                     text-center
-                    text-2xl
+                    text-xl
                     font-bold
                     rounded
                     outline-none
@@ -241,123 +298,87 @@ export default function CloudRegisterPage() {
                   "
                                 />
 
-                                <p className="text-center text-xs text-gray-500 mt-2">
-                                    30文字まで入力できます
+                                <p className="text-center text-[11px] text-gray-500 mt-2">
+                                    30文字まで
                                 </p>
                             </Card>
 
-                            <Card className="p-5 mb-5 bg-white">
-                                <h2 className="font-minecraft text-xl text-center mb-3">
-                                    判定結果
-                                </h2>
+                            <Card className="p-4 bg-white">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="font-minecraft text-lg">
+                                            レア度
+                                        </p>
 
-                                <p className="text-center text-lg font-bold">
-                                    種族：{pendingAnimal.suggestedAnimal}
-                                </p>
-
-                                <p className="text-center text-sm mt-2">
-                                    確信度：{Math.round(confidence * 100)}%
-                                </p>
-
-                                {pendingAnimal.description && (
-                                    <p className="mt-4 text-sm leading-relaxed">
-                                        {pendingAnimal.description}
-                                    </p>
-                                )}
-                            </Card>
-
-                            <Card className="p-5 mb-5 bg-white">
-                                <h2 className="font-minecraft text-xl text-center mb-3">
-                                    レア度
-                                </h2>
-
-                                <div className="text-center">
-                                    <div className="text-4xl text-yellow-500 mb-2">
-                                        {"★".repeat(rarity)}
-                                        {"☆".repeat(5 - rarity)}
+                                        <p
+                                            className={`text-sm font-bold ${rarity >= 4
+                                                    ? "text-yellow-600 animate-pulse"
+                                                    : ""
+                                                }`}
+                                        >
+                                            {rarityLabel}
+                                        </p>
                                     </div>
 
-                                    <p className="font-bold text-xl">{rarityLabel}</p>
+                                    <div className="text-right">
+                                        <div
+                                            className={`text-2xl text-yellow-500 leading-none ${rarity >= 4
+                                                    ? "drop-shadow-lg animate-pulse"
+                                                    : ""
+                                                }`}
+                                        >
+                                            {"★".repeat(rarity)}
+                                            {"☆".repeat(5 - rarity)}
+                                        </div>
 
-                                    <p className="text-sm mt-2">合計雲値：{totalStatus}</p>
-
-                                    {rarity === 5 && (
-                                        <p className="mt-3 text-yellow-600 font-bold animate-pulse">
-                                            👑 LEGENDARY CLOUD 👑
+                                        <p className="mt-1 text-xs">
+                                            合計雲値：{totalStatus}
                                         </p>
-                                    )}
+
+                                        {rarity === 5 && (
+                                            <p className="mt-2 text-xs font-bold text-yellow-600 animate-pulse">
+                                                👑 LEGENDARY 👑
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                             </Card>
 
-                            <Card className="p-5 mb-5 bg-white">
-                                <h2 className="font-minecraft text-xl text-center mb-4">
+                            <Card className="p-4 bg-white">
+                                <h2 className="font-minecraft text-lg text-center mb-3">
                                     ☁ 雲値
                                 </h2>
 
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="flex justify-between mb-1 font-bold">
-                                            <span>❤️ HP</span>
-                                            <span>{status.hp}</span>
-                                        </div>
+                                <div className="space-y-3">
+                                    <StatusBar
+                                        label="❤️ HP"
+                                        value={status.hp}
+                                        color="red"
+                                    />
 
-                                        <ProgressBar
-                                            size="md"
-                                            color="red"
-                                            borderColor="black"
-                                            progress={status.hp}
-                                            className="w-full"
-                                        />
-                                    </div>
+                                    <StatusBar
+                                        label="⚔ 攻撃"
+                                        value={status.attack}
+                                        color="orange"
+                                    />
 
-                                    <div>
-                                        <div className="flex justify-between mb-1 font-bold">
-                                            <span>⚔ 攻撃力</span>
-                                            <span>{status.attack}</span>
-                                        </div>
+                                    <StatusBar
+                                        label="🛡 防御"
+                                        value={status.defense}
+                                        color="skyblue"
+                                    />
 
-                                        <ProgressBar
-                                            size="md"
-                                            color="orange"
-                                            borderColor="black"
-                                            progress={status.attack}
-                                            className="w-full"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <div className="flex justify-between mb-1 font-bold">
-                                            <span>🛡 防御力</span>
-                                            <span>{status.defense}</span>
-                                        </div>
-
-                                        <ProgressBar
-                                            size="md"
-                                            color="skyblue"
-                                            borderColor="black"
-                                            progress={status.defense}
-                                            className="w-full"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <div className="flex justify-between mb-1 font-bold">
-                                            <span>🔥 攻撃強化</span>
-                                            <span>+{status.attackUp}</span>
-                                        </div>
-
-                                        <ProgressBar
-                                            size="md"
-                                            color="pink"
-                                            borderColor="black"
-                                            progress={status.attackUp * 5}
-                                            className="w-full"
-                                        />
-                                    </div>
+                                    <StatusBar
+                                        label="🔥 強化"
+                                        value={status.attackUp}
+                                        displayValue={`+${status.attackUp}`}
+                                        progress={status.attackUp * 5}
+                                        color="pink"
+                                    />
                                 </div>
                             </Card>
 
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <div className="grid grid-cols-2 gap-3 pt-1">
                                 <Button
                                     onClick={() => router.push("/result")}
                                     className="font-minecraft"
@@ -370,7 +391,7 @@ export default function CloudRegisterPage() {
                                     disabled={isRegistering}
                                     className="font-minecraft"
                                 >
-                                    {isRegistering ? "登録中..." : "図鑑に登録する"}
+                                    {isRegistering ? "登録中..." : "登録する"}
                                 </Button>
                             </div>
                         </section>
@@ -378,5 +399,38 @@ export default function CloudRegisterPage() {
                 </Card>
             </div>
         </main>
+    );
+}
+
+type StatusBarProps = {
+    label: string;
+    value: number;
+    displayValue?: string;
+    progress?: number;
+    color: "red" | "orange" | "skyblue" | "pink";
+};
+
+function StatusBar({
+    label,
+    value,
+    displayValue,
+    progress,
+    color,
+}: StatusBarProps) {
+    return (
+        <div>
+            <div className="flex justify-between mb-1 text-sm font-bold">
+                <span>{label}</span>
+                <span>{displayValue ?? value}</span>
+            </div>
+
+            <ProgressBar
+                size="sm"
+                color={color}
+                borderColor="black"
+                progress={progress ?? value}
+                className="w-full"
+            />
+        </div>
     );
 }
