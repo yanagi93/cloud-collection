@@ -1,13 +1,16 @@
-.PHONY: generate ogen test tidy
+.PHONY: generate ogen sqlc test tidy
 
 OPENAPI_SPEC ?= ../docs/openapi.yaml
 OGEN_TARGET ?= internal/api/gen
+SQLC_VERSION ?= v1.31.1
 
-generate:
-	go generate ./...
+generate: ogen sqlc
 
 ogen:
 	go run github.com/ogen-go/ogen/cmd/ogen --target $(OGEN_TARGET) --clean $(OPENAPI_SPEC)
+
+sqlc:
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION) generate
 
 test:
 	go test ./...
