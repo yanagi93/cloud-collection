@@ -73,7 +73,7 @@ export default function HomePage() {
 
                 <Button
                 className="font-minecraft text-lg"
-                onClick={() => router.push("/mypage")}
+                onClick={() => router.push("/profile")}
                 >
                 👤 マイページ
                 </Button>

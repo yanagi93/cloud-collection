@@ -23,10 +23,9 @@ export default function Home() {
 
         {/* ゲームスタート → ログイン */}
         <div className="absolute bottom-[85px] left-1/2 -translate-x-1/2">
-          <Button
-            color="blue"
-            onClick={() => router.push("/login")}
-          />
+          <Button onClick={() => router.push("/login")}>
+            ゲームスタート
+          </Button>
         </div>
         {/* ゲームスタート → 新規登録 */}
         <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2">
