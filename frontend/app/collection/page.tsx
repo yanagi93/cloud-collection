@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, Button } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 export default function CollectionPage() {
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function CollectionPage() {
   };
 
   return (
+  <AuthGuard>
     <main className="min-h-screen bg-gradient-to-b from-sky-300 to-sky-100 p-8">
       {/* タイトル */}
       <div className="text-center mb-10">
@@ -219,5 +221,6 @@ export default function CollectionPage() {
         </Button>
       </div>
     </main>
+  </AuthGuard>
   );
 }

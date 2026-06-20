@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import AuthGuard from "@/component/AuthGuard";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -111,6 +112,7 @@ export default function ProfilePage() {
   };
 
   return (
+  <AuthGuard>
     <main className="min-h-screen bg-gradient-to-b from-sky-200 to-white flex items-center justify-center">
       <div className="bg-white/90 border-4 border-sky-400 shadow-2xl rounded-2xl w-[450px] p-6">
 
@@ -228,5 +230,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </main>
+  </AuthGuard>
   );
 }

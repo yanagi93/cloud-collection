@@ -1,4 +1,5 @@
 import CloudGlobe from "../../component/CloudGlobe";
+import AuthGuard from "@/component/AuthGuard";
 
 type CloudPhoto = {
     id: string;
@@ -20,6 +21,7 @@ const samplePhotos: CloudPhoto[] = [
 
 export default function GlobePage() {
     return (
+      <AuthGuard>
         <main className="min-h-screen overflow-hidden bg-sky-100 px-4 py-6">
             <div className="mx-auto flex min-h-[90vh] max-w-5xl flex-col items-center justify-center">
                 <h1 className="mb-2 text-center text-2xl font-bold">
@@ -33,5 +35,6 @@ export default function GlobePage() {
                 <CloudGlobe photos={samplePhotos} />
             </div>
         </main>
+      </AuthGuard>
     );
 }

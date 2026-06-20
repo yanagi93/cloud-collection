@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card, Button, ProgressBar } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 type Cloud = {
   id: number;
@@ -138,6 +139,7 @@ export default function BattleContent() {
   // UI
   // ======================
   return (
+  <AuthGuard>
     <div className="min-h-screen bg-sky-100 p-6">
       <h1 className="text-4xl text-center font-bold mb-6">
         ☁ クラウドバトル
@@ -199,6 +201,7 @@ export default function BattleContent() {
             このキャラで開始
           </Button>
         </div>
+      
       )}
 
       {/* ======================
@@ -281,5 +284,6 @@ export default function BattleContent() {
         </>
       )}
     </div>
+  </AuthGuard>
   );
 }

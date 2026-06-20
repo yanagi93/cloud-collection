@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 type UploadResult = {
     id?: string;
@@ -119,6 +120,7 @@ export default function ConfirmPage() {
     };
 
     return (
+      <AuthGuard>
         <main className="min-h-screen bg-sky-300 flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
             <div className="absolute top-10 left-[-50px] text-white opacity-40 text-4xl animate-pulse">
                 ☁️
@@ -180,5 +182,6 @@ export default function ConfirmPage() {
                 </Card>
             </div>
         </main>
+      </AuthGuard>
     );
 }

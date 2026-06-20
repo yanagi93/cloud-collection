@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, Button, ProgressBar } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 export default function CloudDetailPage() {
   const [editMode, setEditMode] = useState(false);
@@ -58,6 +59,7 @@ const rarityInfo =
   const isRare = cloudData.rarity >= 4;
 
   return (
+  <AuthGuard>
     <main className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-200 to-white p-6 overflow-hidden">
 
       {/* 高レア演出 */}
@@ -357,5 +359,6 @@ const rarityInfo =
       </Card>
 
     </main>
+  </AuthGuard>
   );
 }

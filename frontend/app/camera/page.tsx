@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Webcam from "react-webcam";
 import Cropper from "react-easy-crop";
 import { Button, Card } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 type CroppedAreaPixels = {
     x: number;
@@ -131,6 +132,7 @@ export default function CameraPage() {
     };
 
     return (
+      <AuthGuard>
         <main className="h-dvh bg-gradient-to-b from-sky-300 via-sky-200 to-white flex justify-center items-center p-3 overflow-hidden">
             <Card
                 className="w-full max-w-2xl max-h-[calc(100dvh-24px)] p-4 bg-white overflow-hidden"
@@ -263,5 +265,6 @@ export default function CameraPage() {
                 </div>
             </Card>
         </main>
+      </AuthGuard>
     );
 }
