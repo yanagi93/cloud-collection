@@ -236,7 +236,7 @@ func (p *NanoBananaProcessor) Process(ctx context.Context, input ImageProcessing
 	}
 	parsed := parseMetadata(metadata.Text())
 
-	composite, err := p.generate(ctx, input, compositePrompt(parsed.SuggestedAnimal))
+	composite, err := p.generate(ctx, input, compositePrompt(parsed))
 	if err != nil {
 		return ImageProcessingOutput{}, err
 	}
@@ -303,23 +303,103 @@ func (p *NanoBananaProcessor) generate(ctx context.Context, input ImageProcessin
 	return decoded, nil
 }
 
-const metadataPrompt = `Analyze this cloud photo. Return only compact JSON with keys suggested_animal, confidence, description. suggested_animal must be a short Japanese animal name. confidence must be a number from 0 to 1. description must be Japanese.`
+const metadataPrompt = `Analyze this cloud photo and identify one animal suggested by the cloud silhouette.
+Return only compact JSON. Do not include markdown.
+Required JSON keys:
+- suggested_animal: short Japanese animal name.
+- confidence: number from 0 to 1.
+- description: short Japanese summary of why the whole cloud suggests that animal.
+- visual_cues: array of objects. Each object must explain a concrete mapping between the source image and the animal, with keys region, cloud_feature, animal_part, reason. region must describe where in the image or cloud the feature is, such as "中央左", "右上の細い突起", "下側の丸いふくらみ".
+- drawing_plan: array of short Japanese instructions for where to add marker lines. The plan must be based only on visual_cues and must not ask to change the cloud shape.
+Focus on what part of the original cloud looked like which animal body part.`
 
-func compositePrompt(animal string) string {
-	return fmt.Sprintf("Edit the provided cloud photo by overlaying a cute %s illustration that follows the cloud shape. Preserve the original photo as the background.", animal)
+func compositePrompt(metadata processingMetadata) string {
+	animal := strings.TrimSpace(metadata.SuggestedAnimal)
+	if animal == "" {
+		animal = "どうぶつ"
+	}
+
+	var b strings.Builder
+	fmt.Fprintf(&b, "元画像の雲のシルエットから「%s」を連想して、黒いマーカーでアウトラインのみを加筆してください。\n", animal)
+	b.WriteString("目的は、雲そのものを動物に変形することではなく、雲のどの部分がどの動物パーツに見えたのかを、最小限の線で読み取りやすくすることです。\n\n")
+
+	description := strings.TrimSpace(metadata.Description)
+	if description != "" {
+		b.WriteString("判定プロンプトの全体解釈:\n")
+		fmt.Fprintf(&b, "- %s\n\n", description)
+	}
+
+	if len(metadata.VisualCues) > 0 {
+		b.WriteString("元画像で動物に見えた根拠。必ずこの対応関係に沿って描いてください:\n")
+		for _, cue := range metadata.VisualCues {
+			line := cue.PromptLine()
+			if line != "" {
+				fmt.Fprintf(&b, "- %s\n", line)
+			}
+		}
+		b.WriteString("\n")
+	}
+
+	if len(metadata.DrawingPlan) > 0 {
+		b.WriteString("加筆計画。以下を優先してください:\n")
+		for _, step := range metadata.DrawingPlan {
+			step = strings.TrimSpace(step)
+			if step != "" {
+				fmt.Fprintf(&b, "- %s\n", step)
+			}
+		}
+		b.WriteString("\n")
+	}
+
+	b.WriteString("厳守事項:\n")
+	b.WriteString("- 雲、空、写真全体の構図、色、明るさ、質感は変更しない。\n")
+	b.WriteString("- 雲の輪郭やボリュームを描き換えない。雲のシルエットをそのまま使う。\n")
+	b.WriteString("- 加筆線は雲の白いシルエットの内側、または雲の輪郭線上だけに置く。雲の外側の青空・背景には線を描かない。\n")
+	b.WriteString("- 耳、しっぽ、手足などを雲の外へ伸ばして追加しない。雲の外に足りないパーツは描かずに省略する。\n")
+	b.WriteString("- 目や鼻などの小さい記号も、必ず雲の内側に収める。雲から離れた独立した線や記号を追加しない。\n")
+	b.WriteString("- 加筆は黒いマーカーのアウトラインだけにする。太さは一定で、少しざらつきのある手描き線にする。\n")
+	b.WriteString("- 元画像の visual_cues にない動物パーツを大きく追加しない。\n")
+	b.WriteString("- 目、鼻、耳、口、手足などは、visual_cues が示す位置と雲の形に沿う場合だけ最小限に描く。\n")
+	b.WriteString("- 写実的な動物、塗りつぶし、色付きイラスト、影、別背景、別オブジェクトは追加しない。\n")
+	b.WriteString("- 判断が曖昧な部分は描き込みを減らし、破綻しそうな線は省略する。\n")
+
+	return b.String()
 }
 
 type processingMetadata struct {
-	SuggestedAnimal string  `json:"suggested_animal"`
-	Confidence      float64 `json:"confidence"`
-	Description     string  `json:"description"`
+	SuggestedAnimal string          `json:"suggested_animal"`
+	Confidence      float64         `json:"confidence"`
+	Description     string          `json:"description"`
+	VisualCues      []processingCue `json:"visual_cues"`
+	DrawingPlan     []string        `json:"drawing_plan"`
+}
+
+type processingCue struct {
+	Region       string `json:"region"`
+	CloudFeature string `json:"cloud_feature"`
+	AnimalPart   string `json:"animal_part"`
+	Reason       string `json:"reason"`
+}
+
+func (c processingCue) PromptLine() string {
+	parts := []string{}
+	if region := strings.TrimSpace(c.Region); region != "" {
+		parts = append(parts, "位置: "+region)
+	}
+	if feature := strings.TrimSpace(c.CloudFeature); feature != "" {
+		parts = append(parts, "雲の特徴: "+feature)
+	}
+	if part := strings.TrimSpace(c.AnimalPart); part != "" {
+		parts = append(parts, "動物パーツ: "+part)
+	}
+	if reason := strings.TrimSpace(c.Reason); reason != "" {
+		parts = append(parts, "理由: "+reason)
+	}
+	return strings.Join(parts, " / ")
 }
 
 func parseMetadata(raw string) processingMetadata {
-	raw = strings.TrimSpace(raw)
-	raw = strings.Trim(raw, "`")
-	raw = strings.TrimPrefix(raw, "json")
-	raw = strings.TrimSpace(raw)
+	raw = extractJSON(raw)
 
 	var metadata processingMetadata
 	if err := json.Unmarshal([]byte(raw), &metadata); err != nil {
@@ -335,7 +415,50 @@ func parseMetadata(raw string) processingMetadata {
 	if metadata.Confidence < 0 || metadata.Confidence > 1 {
 		metadata.Confidence = 0.5
 	}
+	metadata.Description = strings.TrimSpace(metadata.Description)
+	metadata.VisualCues = compactCues(metadata.VisualCues)
+	metadata.DrawingPlan = compactStrings(metadata.DrawingPlan)
 	return metadata
+}
+
+func extractJSON(raw string) string {
+	raw = strings.TrimSpace(raw)
+	raw = strings.Trim(raw, "`")
+	raw = strings.TrimSpace(raw)
+	raw = strings.TrimPrefix(raw, "json")
+	raw = strings.TrimSpace(raw)
+
+	startObject := strings.Index(raw, "{")
+	endObject := strings.LastIndex(raw, "}")
+	if startObject >= 0 && endObject > startObject {
+		return raw[startObject : endObject+1]
+	}
+	return raw
+}
+
+func compactCues(cues []processingCue) []processingCue {
+	compacted := make([]processingCue, 0, len(cues))
+	for _, cue := range cues {
+		cue.Region = strings.TrimSpace(cue.Region)
+		cue.CloudFeature = strings.TrimSpace(cue.CloudFeature)
+		cue.AnimalPart = strings.TrimSpace(cue.AnimalPart)
+		cue.Reason = strings.TrimSpace(cue.Reason)
+		if cue.PromptLine() != "" {
+			compacted = append(compacted, cue)
+		}
+	}
+	return compacted
+}
+
+func compactStrings(values []string) []string {
+	compacted := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			compacted = append(compacted, value)
+		}
+	}
+	return compacted
 }
 
 func generatedImage(response geminiResponse, fallback ImageProcessingInput) ([]byte, string) {
