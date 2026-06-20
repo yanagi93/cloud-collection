@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Webcam from "react-webcam";
 import Cropper from "react-easy-crop";
 import { Button, Card } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 type CroppedAreaPixels = {
     x: number;
@@ -131,6 +132,7 @@ export default function CameraPage() {
     };
 
     return (
+      <AuthGuard>
         <main className="h-dvh bg-gradient-to-b from-sky-300 via-sky-200 to-white flex justify-center items-center p-3 overflow-hidden">
             <Card
                 className="w-full max-w-2xl max-h-[calc(100dvh-24px)] p-4 bg-white overflow-hidden"
@@ -169,12 +171,14 @@ export default function CameraPage() {
                                     📸 撮影する
                                 </Button>
 
-                                <label
-                                    htmlFor="image-upload"
-                                    className="inline-flex items-center justify-center px-5 py-2 rounded-lg bg-green-500 text-white font-bold text-base cursor-pointer shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] border-2 border-black hover:-translate-y-1 transition-transform active:translate-y-0 active:shadow-none"
+                                <Button
+                                    className="bg-green-400 text-black font-bold"
+                                    onClick={() =>
+                                        document.getElementById("image-upload")?.click()
+                                    }
                                 >
                                     🖼️ 画像を選択
-                                </label>
+                                </Button>
                                 <input
                                     id="image-upload"
                                     type="file"
@@ -261,5 +265,6 @@ export default function CameraPage() {
                 </div>
             </Card>
         </main>
+      </AuthGuard>
     );
 }

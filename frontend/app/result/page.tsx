@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, ProgressBar } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 type ProcessingResult = {
     suggested_animal?: string;
@@ -201,6 +202,7 @@ export default function ResultPage() {
     const description = result?.description;
 
     return (
+      <AuthGuard>
         <main className="min-h-screen bg-sky-300 flex flex-col items-center justify-center p-4 relative overflow-hidden select-none">
             <div className="absolute top-10 left-[-50px] text-white opacity-40 text-4xl animate-pulse">
                 ☁️
@@ -296,14 +298,15 @@ export default function ResultPage() {
                         </Button>
 
                         <Button
-                            onClick={() => router.push("/home")}
+                            onClick={() => router.push("/cloud-register")}
                             className="h-16 flex items-center justify-center bg-white text-black font-bold text-lg"
                         >
-                            🏠 ホームへ
+                            🏠 登録画面へ
                         </Button>
                     </div>
                 </Card>
             </div>
         </main>
+      </AuthGuard>
     );
 }

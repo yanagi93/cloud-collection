@@ -1,45 +1,82 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, Button } from "pixel-retroui";
+import AuthGuard from "@/component/AuthGuard";
 
 export default function CollectionPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const [cloudAnimals, setCloudAnimals] =
+    useState<any[]>([]);
 
-    // if (!isLoggedIn) {
-    //   router.push("/login");
-    // }
+  useEffect(() => {
+    const fetchAnimals = async () => {
+      try {
+        const token =
+          localStorage.getItem("accessToken");
+
+        console.log("token", token);
+
+        if (!token) {
+          router.push("/login");
+          return;
+        }
+
+        const res = await fetch(
+          "http://localhost:8080/animals",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log(
+          "/animals status",
+          res.status
+        );
+
+        if (!res.ok) {
+          throw new Error("取得失敗");
+        }
+
+        const data = await res.json();
+
+        console.log("/animals", data);
+
+        setCloudAnimals(data.items ?? []);
+      } catch (error) {
+        console.error(
+          "ANIMALS ERROR",
+          error
+        );
+      }
+    };
+
+    fetchAnimals();
   }, [router]);
 
-  const cloudAnimals = [
-    {
-      id: 1,
-      name: "もくもくライオン",
-      image: "https://via.placeholder.com/300x200?text=Lion",
-    },
-    {
-      id: 2,
-      name: "サンダードラゴン",
-      image: "https://via.placeholder.com/300x200?text=Dragon",
-    },
-    {
-      id: 3,
-      name: "スカイウルフ",
-      image: "https://via.placeholder.com/300x200?text=Wolf",
-    },
-    {
-      id: 4,
-      name: "クラウドフェニックス",
-      image: "https://via.placeholder.com/300x200?text=Phoenix",
-    },
-  ];
+  const getRarity = (hp: number) => {
+    if (hp >= 90) return 5;
+    if (hp >= 75) return 4;
+    if (hp >= 60) return 3;
+    if (hp >= 40) return 2;
+    return 1;
+  };
+
+  const rarityLabel = {
+    1: "コモン",
+    2: "アンコモン",
+    3: "レア",
+    4: "エピック",
+    5: "レジェンダリー",
+  };
 
   return (
+  <AuthGuard>
     <main className="min-h-screen bg-gradient-to-b from-sky-300 to-sky-100 p-8">
       {/* タイトル */}
       <div className="text-center mb-10">
@@ -58,36 +95,120 @@ export default function CollectionPage() {
 
       {/* 図鑑一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {cloudAnimals.map((cloud) => (
-          <Link
-            key={cloud.id}
-            href={`/cloud-detail/${cloud.id}`}
-            className="hover:scale-105 transition-all duration-300"
+        {cloudAnimals.map((cloud) => {
+          const rarity = getRarity(cloud.hp ?? 0);
+
+          return (
+            <Link
+              key={cloud.id}
+              href={`/cloud-detail/${cloud.id}`}
+              className="hover:scale-105 transition-all duration-300"
+            >
+              <Card
+                bg={
+                  rarity === 5
+                    ? "#fde68a"
+                    : rarity === 4
+                    ? "#e0d9ff"
+                    : rarity === 3
+                    ? "#93c5fd"
+                    : rarity === 2
+                    ? "#86efac"
+                    : "#ffffff"
+                }
+                className={`
+                  p-4
+                  h-full
+                  ${
+                    rarity >= 4
+                      ? "border-4 border-yellow-400 shadow-xl"
+                      : ""
+                  }
+                `}
+              >
+                <img
+                  src={
+                    cloud.composite_image_url ??
+                    cloud.original_image_url
+                  }
+                  alt={cloud.name}
+                  className="w-full h-48 object-cover rounded mb-4"
+                />
+
+                {/* レアリティ */}
+                <div className="text-center mb-3">
+                  <div className="text-yellow-500 text-xl">
+                    {"★".repeat(rarity)}
+                    {"☆".repeat(5 - rarity)}
+                  </div>
+
+                  <p className="text-sm font-bold">
+                    {
+                      rarityLabel[
+                        rarity as keyof typeof rarityLabel
+                      ]
+                    }
+                  </p>
+
+                  {rarity === 5 && (
+                    <p className="text-yellow-600 font-bold animate-pulse mt-1">
+                      👑 LEGENDARY
+                    </p>
+                  )}
+                </div>
+
+                <h2 className="font-minecraft text-xl text-center">
+                  {cloud.name}
+                </h2>
+
+                <p className="text-center text-sm mt-2">
+                  {cloud.species}
+                </p>
+
+                <div className="mt-3 text-center text-xs text-gray-600">
+                  HP: {cloud.hp}
+                </div>
+              </Card>
+            </Link>
+          );
+        })}
+
+        {/* 撮影へ誘導 */}
+        <Link
+          href="/camera"
+          className="hover:scale-105 transition-all duration-300"
+        >
+          <Card
+            className="
+              p-4
+              h-full
+              border-4
+              border-dashed
+              border-sky-400
+              bg-sky-50
+              hover:bg-sky-100
+              cursor-pointer
+            "
           >
-            <Card className="p-4 h-full">
-              <img
-                src={cloud.image}
-                alt={cloud.name}
-                className="w-full h-48 object-cover rounded mb-4"
-              />
+            <div className="w-full h-48 flex flex-col items-center justify-center">
+              <div className="text-7xl mb-2">
+                📷
+              </div>
 
-              <h2 className="font-minecraft text-xl text-center">
-                {cloud.name}
-              </h2>
-            </Card>
-          </Link>
-        ))}
+              <div className="text-3xl">
+                ☁️
+              </div>
+            </div>
 
-        {/* 未発見 */}
-        <Card className="p-4 opacity-60">
-          <div className="w-full h-48 flex items-center justify-center text-7xl">
-            ❓
-          </div>
+            <h2 className="font-minecraft text-xl text-center font-bold">
+              雲の写真を撮ろう！
+            </h2>
 
-          <h2 className="font-minecraft text-xl text-center">
-            未発見
-          </h2>
-        </Card>
+            <p className="text-center text-sm mt-2 text-gray-600">
+              新しい雲モンスターを発見しよう
+            </p>
+          </Card>
+        </Link>
       </div>
 
       {/* 戻るボタン */}
@@ -100,5 +221,6 @@ export default function CollectionPage() {
         </Button>
       </div>
     </main>
+  </AuthGuard>
   );
 }
