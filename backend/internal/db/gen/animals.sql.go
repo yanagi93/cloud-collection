@@ -46,6 +46,10 @@ INSERT INTO animals (
     composite_image_url,
     confidence,
     description,
+    hp,
+    attack,
+    evasion,
+    defense,
     captured_at,
     latitude,
     longitude
@@ -60,25 +64,33 @@ SELECT
     pj.composite_image_url,
     pj.confidence,
     pj.description,
+    $3,
+    $4,
+    $5,
+    $6,
     cp.captured_at,
     cp.latitude,
     cp.longitude
 FROM cloud_photos cp
 JOIN processing_jobs pj ON pj.photo_id = cp.id
-WHERE cp.id = $3
-  AND cp.user_id = $4
+WHERE cp.id = $7
+  AND cp.user_id = $8
   AND pj.status = 'completed'
   AND pj.suggested_animal IS NOT NULL
   AND pj.confidence IS NOT NULL
   AND pj.composite_image_url IS NOT NULL
 ORDER BY pj.completed_at DESC, pj.created_at DESC
 LIMIT 1
-RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 `
 
 type CreateAnimalFromCompletedJobParams struct {
 	Name    string      `db:"name" json:"name"`
 	Species pgtype.Text `db:"species" json:"species"`
+	Hp      int32       `db:"hp" json:"hp"`
+	Attack  int32       `db:"attack" json:"attack"`
+	Evasion int32       `db:"evasion" json:"evasion"`
+	Defense int32       `db:"defense" json:"defense"`
 	PhotoID uuid.UUID   `db:"photo_id" json:"photo_id"`
 	UserID  uuid.UUID   `db:"user_id" json:"user_id"`
 }
@@ -87,6 +99,10 @@ func (q *Queries) CreateAnimalFromCompletedJob(ctx context.Context, arg CreateAn
 	row := q.db.QueryRow(ctx, createAnimalFromCompletedJob,
 		arg.Name,
 		arg.Species,
+		arg.Hp,
+		arg.Attack,
+		arg.Evasion,
+		arg.Defense,
 		arg.PhotoID,
 		arg.UserID,
 	)
@@ -102,6 +118,10 @@ func (q *Queries) CreateAnimalFromCompletedJob(ctx context.Context, arg CreateAn
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
+		&i.Hp,
+		&i.Attack,
+		&i.Evasion,
+		&i.Defense,
 		&i.CapturedAt,
 		&i.Latitude,
 		&i.Longitude,
@@ -131,7 +151,7 @@ func (q *Queries) DeleteAnimal(ctx context.Context, arg DeleteAnimalParams) (int
 }
 
 const getAnimalByID = `-- name: GetAnimalByID :one
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE id = $1
   AND user_id = $2
@@ -156,6 +176,10 @@ func (q *Queries) GetAnimalByID(ctx context.Context, arg GetAnimalByIDParams) (A
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
+		&i.Hp,
+		&i.Attack,
+		&i.Evasion,
+		&i.Defense,
 		&i.CapturedAt,
 		&i.Latitude,
 		&i.Longitude,
@@ -166,7 +190,7 @@ func (q *Queries) GetAnimalByID(ctx context.Context, arg GetAnimalByIDParams) (A
 }
 
 const getAnimalByPhotoID = `-- name: GetAnimalByPhotoID :one
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE photo_id = $1
   AND user_id = $2
@@ -191,6 +215,10 @@ func (q *Queries) GetAnimalByPhotoID(ctx context.Context, arg GetAnimalByPhotoID
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
+		&i.Hp,
+		&i.Attack,
+		&i.Evasion,
+		&i.Defense,
 		&i.CapturedAt,
 		&i.Latitude,
 		&i.Longitude,
@@ -201,7 +229,7 @@ func (q *Queries) GetAnimalByPhotoID(ctx context.Context, arg GetAnimalByPhotoID
 }
 
 const listAnimalsCreatedAtAsc = `-- name: ListAnimalsCreatedAtAsc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -245,6 +273,10 @@ func (q *Queries) ListAnimalsCreatedAtAsc(ctx context.Context, arg ListAnimalsCr
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
+			&i.Hp,
+			&i.Attack,
+			&i.Evasion,
+			&i.Defense,
 			&i.CapturedAt,
 			&i.Latitude,
 			&i.Longitude,
@@ -262,7 +294,7 @@ func (q *Queries) ListAnimalsCreatedAtAsc(ctx context.Context, arg ListAnimalsCr
 }
 
 const listAnimalsCreatedAtDesc = `-- name: ListAnimalsCreatedAtDesc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -306,6 +338,10 @@ func (q *Queries) ListAnimalsCreatedAtDesc(ctx context.Context, arg ListAnimalsC
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
+			&i.Hp,
+			&i.Attack,
+			&i.Evasion,
+			&i.Defense,
 			&i.CapturedAt,
 			&i.Latitude,
 			&i.Longitude,
@@ -323,7 +359,7 @@ func (q *Queries) ListAnimalsCreatedAtDesc(ctx context.Context, arg ListAnimalsC
 }
 
 const listAnimalsNameAsc = `-- name: ListAnimalsNameAsc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -367,6 +403,10 @@ func (q *Queries) ListAnimalsNameAsc(ctx context.Context, arg ListAnimalsNameAsc
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
+			&i.Hp,
+			&i.Attack,
+			&i.Evasion,
+			&i.Defense,
 			&i.CapturedAt,
 			&i.Latitude,
 			&i.Longitude,
@@ -384,7 +424,7 @@ func (q *Queries) ListAnimalsNameAsc(ctx context.Context, arg ListAnimalsNameAsc
 }
 
 const listAnimalsNameDesc = `-- name: ListAnimalsNameDesc :many
-SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals
 WHERE user_id = $1
   AND (
@@ -428,6 +468,10 @@ func (q *Queries) ListAnimalsNameDesc(ctx context.Context, arg ListAnimalsNameDe
 			&i.CompositeImageUrl,
 			&i.Confidence,
 			&i.Description,
+			&i.Hp,
+			&i.Attack,
+			&i.Evasion,
+			&i.Defense,
 			&i.CapturedAt,
 			&i.Latitude,
 			&i.Longitude,
@@ -452,7 +496,7 @@ SET
     updated_at = now()
 WHERE id = $3
   AND user_id = $4
-RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, captured_at, latitude, longitude, created_at, updated_at
+RETURNING id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 `
 
 type UpdateAnimalParams struct {
@@ -481,6 +525,10 @@ func (q *Queries) UpdateAnimal(ctx context.Context, arg UpdateAnimalParams) (Ani
 		&i.CompositeImageUrl,
 		&i.Confidence,
 		&i.Description,
+		&i.Hp,
+		&i.Attack,
+		&i.Evasion,
+		&i.Defense,
 		&i.CapturedAt,
 		&i.Latitude,
 		&i.Longitude,

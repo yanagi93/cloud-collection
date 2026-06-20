@@ -64,6 +64,10 @@ func (h *Handler) CreateAnimal(ctx context.Context, req *gen.CreateAnimalRequest
 		UseSuggestedAnimal: useSuggestedAnimal,
 		Species:            req.Species.Value,
 		SpeciesSet:         req.Species.Set,
+		Hp:                 int32(req.Hp),
+		Attack:             int32(req.Attack),
+		Evasion:            int32(req.Evasion),
+		Defense:            int32(req.Defense),
 	})
 	if errors.Is(err, service.ErrInvalidAnimalRequest) {
 		return createAnimalBadRequest(), nil
@@ -159,6 +163,10 @@ func animalResponse(animal dbgen.Animal) gen.Animal {
 		CompositeImageURL: urlValue(animal.CompositeImageUrl),
 		Confidence:        gen.NewOptFloat32(float32(animal.Confidence)),
 		Description:       apiString(animal.Description),
+		Hp:                int(animal.Hp),
+		Attack:            int(animal.Attack),
+		Evasion:           int(animal.Evasion),
+		Defense:           int(animal.Defense),
 		CapturedAt:        apiNilDateTime(animal.CapturedAt),
 		Location:          apiLocation(animal.Latitude, animal.Longitude),
 		CreatedAt:         animal.CreatedAt.Time,

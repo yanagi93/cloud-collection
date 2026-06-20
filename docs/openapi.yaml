@@ -14,6 +14,7 @@ info:
     3. `GET /cloud-photos/{photoId}/process` で処理完了をポーリングする
     4. 結果を確認し、`POST /animals` で名前をつけてコレクションに登録する
     5. `GET /animals` でコレクション一覧を閲覧する
+    6. `POST /battles` で登録済みの動物同士をバトルさせる
 
 servers:
   - url: http://localhost:8080
@@ -30,6 +31,8 @@ tags:
     description: AI による動物連想・落書き生成
   - name: Animals
     description: 名前付き動物コレクション
+  - name: Battles
+    description: 登録済み動物同士のバトル
 
 paths:
   /auth/register:
@@ -399,6 +402,70 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /battles:
+    post:
+      tags: [Battles]
+      operationId: createBattle
+      summary: 登録済み動物同士でバトルする
+      description: |
+        challenger_id と defender_id で指定したコレクション動物同士のバトルを実行し、
+        初期ステータス、勝者、ターンごとの行動ログを返す。
+        バトルは完全ターン制で自動実行され、各ターンに両者が attack を行う。
+        攻撃が命中した場合、攻撃側の attack から防御側の defense を引いた値だけ HP を減らす。
+        防御側の evasion は回避率（%）として扱い、命中率は `100 - evasion` で判定する。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBattleRequest'
+            examples:
+              default:
+                value:
+                  challenger_id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+                  defender_id: e3f6c1c4-8a76-4d52-a36f-7fbd3d6c31c2
+      responses:
+        '200':
+          description: バトル結果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleResult'
+              examples:
+                default:
+                  value:
+                    initial_status:
+                      challenger:
+                        hp: 100
+                        attack: 10
+                        evasion: 5
+                        defense: 5
+                      defender:
+                        hp: 120
+                        attack: 8
+                        evasion: 6
+                        defense: 8
+                    winner: challenger
+                    battle_log:
+                      - actor: challenger
+                        actions:
+                          - type: attack
+                            hit: true
+                            damage: 10
+                      - actor: defender
+                        actions:
+                          - type: attack
+                            hit: true
+                            damage: 3
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -698,7 +765,7 @@ components:
 
     CreateAnimalRequest:
       type: object
-      required: [photo_id, name]
+      required: [photo_id, name, hp, attack, evasion, defense]
       properties:
         photo_id:
           type: string
@@ -718,6 +785,22 @@ components:
           type: string
           maxLength: 30
           description: use_suggested_animal=false の場合に手動指定する動物種別
+        hp:
+          type: integer
+          description: バトルで使用する HP
+          example: 100
+        attack:
+          type: integer
+          description: バトルで使用する攻撃力
+          example: 10
+        evasion:
+          type: integer
+          description: バトルで使用する回避力
+          example: 5
+        defense:
+          type: integer
+          description: バトルで使用する防御力
+          example: 5
 
     UpdateAnimalRequest:
       type: object
@@ -739,6 +822,10 @@ components:
         - name
         - species
         - composite_image_url
+        - hp
+        - attack
+        - evasion
+        - defense
         - created_at
       properties:
         id:
@@ -773,6 +860,22 @@ components:
         description:
           type: string
           description: AI による雲の形の説明
+        hp:
+          type: integer
+          description: バトルで使用する HP
+          example: 100
+        attack:
+          type: integer
+          description: バトルで使用する攻撃力
+          example: 10
+        evasion:
+          type: integer
+          description: バトルで使用する回避力
+          example: 5
+        defense:
+          type: integer
+          description: バトルで使用する防御力
+          example: 5
         captured_at:
           type: string
           format: date-time
@@ -796,6 +899,103 @@ components:
             $ref: '#/components/schemas/Animal'
         pagination:
           $ref: '#/components/schemas/Pagination'
+
+    CreateBattleRequest:
+      type: object
+      required: [challenger_id, defender_id]
+      properties:
+        challenger_id:
+          type: string
+          format: uuid
+          description: 攻撃側としてバトルに参加するコレクション動物 ID
+          example: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        defender_id:
+          type: string
+          format: uuid
+          description: 防御側としてバトルに参加するコレクション動物 ID
+          example: e3f6c1c4-8a76-4d52-a36f-7fbd3d6c31c2
+
+    BattleResult:
+      type: object
+      required: [initial_status, winner, battle_log]
+      properties:
+        initial_status:
+          $ref: '#/components/schemas/BattleInitialStatus'
+        winner:
+          $ref: '#/components/schemas/BattleParticipantRole'
+        battle_log:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/BattleTurnLog'
+
+    BattleInitialStatus:
+      type: object
+      required: [challenger, defender]
+      properties:
+        challenger:
+          $ref: '#/components/schemas/BattleStatus'
+        defender:
+          $ref: '#/components/schemas/BattleStatus'
+
+    BattleStatus:
+      type: object
+      required: [hp, attack, evasion, defense]
+      properties:
+        hp:
+          type: integer
+          example: 100
+        attack:
+          type: integer
+          example: 10
+        evasion:
+          type: integer
+          description: 回避力
+          example: 5
+        defense:
+          type: integer
+          example: 5
+
+    BattleParticipantRole:
+      type: string
+      enum: [challenger, defender]
+
+    BattleTurnLog:
+      type: object
+      required: [actor, actions]
+      properties:
+        actor:
+          $ref: '#/components/schemas/BattleParticipantRole'
+        actions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/BattleAction'
+
+    BattleAction:
+      type: object
+      required: [type]
+      description: |
+        バトル中の行動。type は attack または attack_buff のみ。
+        type=attack の場合は hit と damage、type=attack_buff の場合は increment を返す。
+      properties:
+        type:
+          type: string
+          enum: [attack, attack_buff]
+        hit:
+          type: boolean
+          description: type=attack の場合の命中結果
+          example: true
+        damage:
+          type: integer
+          minimum: 0
+          description: type=attack の場合のダメージ量
+          example: 10
+        increment:
+          type: integer
+          minimum: 0
+          description: type=attack_buff の場合の attack 上昇量
+          example: 3
 
     Pagination:
       type: object
