@@ -2,99 +2,339 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Card,
+  Input,
+  Button,
+  Popup,
+} from "pixel-retroui";
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
+  const passwordRegex =
+    /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] =
+    useState("");
 
-  const handleRegister = () => {
-    //メールアドレス確認
+  const [isErrorOpen, setIsErrorOpen] =
+    useState(false);
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  const handleRegister = async () => {
+    // 未入力チェック
+    if (!name && !email && !password) {
+      setErrorMessage(
+        "全て入力してください"
+      );
+      setIsErrorOpen(true);
+      return;
+    }
+
+    if (!name) {
+      setErrorMessage(
+        "ユーザー名を入力してください"
+      );
+      setIsErrorOpen(true);
+      return;
+    }
+
+    if (!email) {
+      setErrorMessage(
+        "メールアドレスを入力してください"
+      );
+      setIsErrorOpen(true);
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage(
+        "パスワードを入力してください"
+      );
+      setIsErrorOpen(true);
+      return;
+    }
+
+    // メール形式チェック
     if (!emailRegex.test(email)) {
-        alert("メールアドレスが正しくありません");
-    } else {
-        //パスワード確認
-        if (!passwordRegex.test(password)) {
-            alert("パスワードは8文字以上で英数字を含めてください");
-        } else {
-            //成功、未入力確認
-            if (name && email && password) {
-                alert("登録成功（仮）");
-                router.push("/login"); // or "/"
-            } else {
-                alert("全て入力してください");
-            }
+      setErrorMessage(
+        "メールアドレスの形式が正しくありません"
+      );
+      setIsErrorOpen(true);
+      return;
+    }
+
+    // パスワード形式チェック
+    if (!passwordRegex.test(password)) {
+      setErrorMessage(
+        "パスワードは8文字以上で英数字を含めてください"
+      );
+      setIsErrorOpen(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:8080/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            display_name: name,
+          }),
         }
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(
+          data.message ??
+            "登録に失敗しました"
+        );
+        setIsErrorOpen(true);
+        return;
+      }
+
+      // 登録成功後
+
+      const loginResponse = await fetch(
+        "http://localhost:8080/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      if (!loginResponse.ok) {
+        setErrorMessage(
+          "登録は成功しましたがログインに失敗しました"
+        );
+        setIsErrorOpen(true);
+        return;
+      }
+
+      const loginData = await loginResponse.json();
+
+      localStorage.setItem(
+        "accessToken",
+        loginData.access_token
+      );
+
+      localStorage.setItem(
+        "isLoggedIn",
+        "true"
+      );
+
+      router.push("/home");
+    } catch (error) {
+      console.error(error);
+      
+      setErrorMessage(
+        "サーバーに接続できませんでした"
+      );
+      setIsErrorOpen(true);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-200 to-white">
-
-      <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl w-[350px]">
-
-        <h1 className="text-3xl font-bold text-center mb-2">
-          新規登録
-        </h1>
-
-        <p className="text-center text-gray-500 mb-6">
-          雲コレクションを始めよう
-        </p>
-
-        {/* ユーザー名 */}
-        <input
-          type="text"
-          placeholder="ユーザー名"
-          className="w-full p-3 mb-3 border rounded-lg"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        {/* メール */}
-        <input
-          type="email"
-          placeholder="メールアドレス"
-          className="w-full p-3 mb-3 border rounded-lg"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        {/* パスワード */}
-        <input
-          type="password"
-          placeholder="パスワード"
-          className="w-full p-3 mb-6 border rounded-lg"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {/* ボタン */}
-        <button
-          onClick={handleRegister}
+    <div
+      className="
+        min-h-screen
+        flex
+        items-center
+        justify-center
+        bg-gradient-to-b
+        from-sky-200
+        to-white
+        px-4
+      "
+    >
+      <Card
+        bg="#f9e191"
+        className="
+          w-full
+          max-w-md
+          p-8
+          flex
+          flex-col
+          items-center
+        "
+      >
+        <h1
           className="
-            w-full
-            bg-yellow-500
-            hover:bg-yellow-600
-            text-white
-            py-3
-            rounded-lg
+            text-3xl
             font-bold
-            shadow-md
-            transition-all
-            duration-300
-            hover:scale-105
+            mb-2
           "
         >
-          登録する
-        </button>
+          ☁ 新規登録
+        </h1>
 
-      </div>
+        <p
+          className="
+            text-sm
+            text-center
+            mb-6
+          "
+        >
+          Cloud Collectionを始めよう
+        </p>
+
+        <div
+          className="
+            flex
+            flex-col
+            gap-4
+          "
+        >
+          {/* ユーザー名 */}
+          <div>
+            <p
+              className="
+                font-bold
+                text-center
+                mb-2
+              "
+            >
+              ユーザー名
+            </p>
+
+            <Input
+              bg="#ffffff"
+              borderColor="black"
+              placeholder="ユーザー名を入力"
+              className="w-full"
+              onChange={(e) =>
+                setName(e.target.value)
+              }
+            />
+          </div>
+
+          {/* メールアドレス */}
+          <div>
+            <p
+              className="
+                font-bold
+                text-center
+                mb-2
+              "
+            >
+              メールアドレス
+            </p>
+
+            <Input
+              bg="#ffffff"
+              borderColor="black"
+              placeholder="メールアドレスを入力"
+              className="w-full"
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+            />
+          </div>
+
+          {/* パスワード */}
+          <div>
+            <p
+              className="
+                font-bold
+                text-center
+                mb-2
+              "
+            >
+              パスワード
+            </p>
+
+            <Input
+              type="password"
+              bg="#ffffff"
+              borderColor="black"
+              placeholder="パスワードを入力"
+              className="w-full"
+              onChange={(e) =>
+                setPassword(
+                  e.target.value
+                )
+              }
+            />
+          </div>
+
+          <Button
+            bg="#f59e0b"
+            textColor="white"
+            className="mt-4"
+            onClick={handleRegister}
+          >
+            登録する
+          </Button>
+
+          <Button
+            bg="#38bdf8"
+            textColor="white"
+            onClick={() =>
+              router.push("/login")
+            }
+          >
+            ログインはこちら
+          </Button>
+        </div>
+      </Card>
+
+      {/* エラーポップアップ */}
+      <Popup
+        isOpen={isErrorOpen}
+        onClose={() =>
+          setIsErrorOpen(false)
+        }
+        bg="#fefcd0"
+        baseBg="#ef4444"
+        borderColor="black"
+      >
+        <div className="text-center">
+          <h2
+            className="
+              text-xl
+              font-bold
+              mb-4
+            "
+          >
+            ⚠ 登録エラー
+          </h2>
+
+          <p className="mb-4">
+            {errorMessage}
+          </p>
+
+          <Button
+            onClick={() =>
+              setIsErrorOpen(false)
+            }
+          >
+            OK
+          </Button>
+        </div>
+      </Popup>
     </div>
   );
 }
