@@ -1,242 +1,221 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Webcam from "react-webcam";
 import { Button, Card } from "pixel-retroui";
 
 export default function CameraPage() {
     const router = useRouter();
 
-    const [previewUrl, setPreviewUrl] = useState<string>("");
+    const webcamRef = useRef<Webcam>(null);
 
-    const handleImageChange = (
+    const [capturedImage, setCapturedImage] =
+        useState<string | null>(null);
+
+    const capture = () => {
+        const imageSrc =
+            webcamRef.current?.getScreenshot();
+
+        if (imageSrc) {
+            setCapturedImage(imageSrc);
+        }
+    };
+
+    const handleImageSelect = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
-        const file = event.target.files?.[0];
+        const file =
+            event.target.files?.[0];
 
         if (!file) return;
 
-        const imageUrl = URL.createObjectURL(file);
+        const imageUrl =
+            URL.createObjectURL(file);
 
-        setPreviewUrl(imageUrl);
+        setCapturedImage(imageUrl);
+    };
+
+    const handleRetake = () => {
+        setCapturedImage(null);
     };
 
     const handleNext = () => {
+        if (!capturedImage) return;
+
+        sessionStorage.setItem(
+            "selectedCloudImage",
+            capturedImage
+        );
+
         router.push("/confirm");
     };
 
     return (
         <main
             className="
-                relative
                 min-h-screen
-                overflow-hidden
                 bg-gradient-to-b
                 from-sky-300
                 via-sky-200
                 to-white
                 flex
-                items-center
                 justify-center
+                items-center
                 p-4
-                sm:p-6
-                md:p-8
             "
         >
-            {/* 背景の流れる雲 */}
-
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-
-                <div
-                    className="
-                        absolute
-                        bottom-8
-                        text-4xl
-                        sm:text-6xl
-                        md:text-8xl
-                        opacity-30
-                        cloud-float
-                        cloud-slow
-                    "
-                >
-                    ☁️
-                </div>
-
-                <div
-                    className="
-                        absolute
-                        bottom-28
-                        text-3xl
-                        sm:text-5xl
-                        md:text-7xl
-                        opacity-20
-                        cloud-float
-                        cloud-medium
-                    "
-                    style={{
-                        animationDelay: "-8s",
-                    }}
-                >
-                    ☁️
-                </div>
-
-                <div
-                    className="
-                        absolute
-                        bottom-16
-                        text-5xl
-                        sm:text-7xl
-                        md:text-9xl
-                        opacity-10
-                        cloud-float
-                        cloud-fast
-                    "
-                    style={{
-                        animationDelay: "-15s",
-                    }}
-                >
-                    ☁️
-                </div>
-
-            </div>
-
-            {/* メインカード */}
-
             <Card
                 className="
                     w-full
-                    max-w-3xl
-                    p-4
-                    sm:p-6
-                    md:p-8
-                    backdrop-blur-md
-                    shadow-2xl
-                    z-10
+                    max-w-4xl
+                    p-6
                 "
             >
                 <div className="text-center mb-8">
 
                     <h1
                         className="
-                            text-3xl
-                            sm:text-4xl
-                            md:text-5xl
+                            text-4xl
+                            font-bold
                             mb-3
                         "
                     >
-                        📷 雲を撮影しよう
+                        ☁️ 雲を撮影しよう
                     </h1>
 
-                    <p
-                        className="
-                            text-sm
-                            sm:text-base
-                            text-gray-600
-                        "
-                    >
-                        空に浮かぶ雲を選んで、
-                        AIイラストに変換しよう。
+                    <p>
+                        カメラ撮影または
+                        画像アップロード
                     </p>
 
                 </div>
 
-                <div className="flex flex-col items-center gap-6">
-
-                    <label
-                        htmlFor="image-upload"
-                        className="
-                            cursor-pointer
-                            rounded-xl
-                            bg-sky-500
-                            px-6
-                            py-4
-                            text-white
-                            shadow-lg
-                            hover:bg-sky-600
-                            transition
-                            text-center
-                            w-full
-                            sm:w-auto
-                        "
-                    >
-                        雲の写真を選択
-                    </label>
-
-                    <input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                    />
-
-                    {previewUrl ? (
-                        <div className="w-full flex justify-center">
-
-                            <img
-                                src={previewUrl}
-                                alt="cloud preview"
+                <div
+                    className="
+                        flex
+                        flex-col
+                        items-center
+                        gap-6
+                    "
+                >
+                    {!capturedImage ? (
+                        <>
+                            <Webcam
+                                ref={webcamRef}
+                                audio={false}
+                                screenshotFormat="image/jpeg"
+                                videoConstraints={{
+                                    facingMode: {
+                                        ideal:
+                                            "environment",
+                                    },
+                                }}
                                 className="
                                     w-full
-                                    max-w-xl
-                                    max-h-[50vh]
-                                    object-contain
-                                    rounded-2xl
+                                    max-w-2xl
+                                    rounded-xl
                                     border-4
                                     border-white
                                     shadow-xl
                                 "
                             />
 
-                        </div>
+                            <div
+                                className="
+                                    flex
+                                    flex-wrap
+                                    justify-center
+                                    gap-4
+                                "
+                            >
+                                <Button
+                                    onClick={
+                                        capture
+                                    }
+                                >
+                                    📸 撮影する
+                                </Button>
+
+                                <label
+                                    htmlFor="image-upload"
+                                    className="
+                                        px-6
+                                        py-3
+                                        rounded-lg
+                                        bg-sky-500
+                                        text-white
+                                        cursor-pointer
+                                    "
+                                >
+                                    🖼️
+                                    画像を選択
+                                </label>
+
+                                <input
+                                    id="image-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={
+                                        handleImageSelect
+                                    }
+                                    className="hidden"
+                                />
+                            </div>
+                        </>
                     ) : (
-                        <div
-                            className="
-                                w-full
-                                h-[180px]
-                                sm:h-[240px]
-                                md:h-[300px]
-                                border-4
-                                border-dashed
-                                border-sky-300
-                                rounded-2xl
-                                flex
-                                items-center
-                                justify-center
-                                text-sky-500
-                                text-center
-                                px-4
-                                bg-white/30
-                            "
-                        >
-                            ここに雲の写真が表示されます
-                        </div>
+                        <>
+                            <img
+                                src={
+                                    capturedImage
+                                }
+                                alt="preview"
+                                className="
+                                    w-full
+                                    max-w-2xl
+                                    rounded-xl
+                                    border-4
+                                    border-white
+                                    shadow-xl
+                                "
+                            />
+
+                            <div
+                                className="
+                                    flex
+                                    flex-wrap
+                                    justify-center
+                                    gap-4
+                                "
+                            >
+                                <Button
+                                    onClick={
+                                        handleRetake
+                                    }
+                                >
+                                    🔄 撮り直し
+                                </Button>
+
+                                <Button
+                                    onClick={
+                                        handleNext
+                                    }
+                                >
+                                    次へ →
+                                </Button>
+                            </div>
+                        </>
                     )}
 
-                    <div
-                        className="
-                            flex
-                            flex-col
-                            sm:flex-row
-                            gap-4
-                            w-full
-                            justify-center
-                        "
+                    <Button
+                        onClick={() =>
+                            router.push(
+                                "/home"
+                            )
+                        }
                     >
-                        <Button
-                            onClick={() => router.push("/home")}
-                        >
-                            ← 戻る
-                        </Button>
-
-                        <Button
-                            onClick={handleNext}
-                            disabled={!previewUrl}
-                        >
-                            次へ →
-                        </Button>
-                    </div>
-
+                        ← ホームへ戻る
+                    </Button>
                 </div>
             </Card>
         </main>
