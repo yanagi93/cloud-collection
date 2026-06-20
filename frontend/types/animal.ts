@@ -31,6 +31,10 @@ export type CreateAnimalRequest = {
     name: string;
     useSuggestedAnimal: boolean;
     species?: string;
+    hp: number;
+    attack: number;
+    evasion: number;
+    defense: number;
 };
 
 export type AnimalListResponse = {
