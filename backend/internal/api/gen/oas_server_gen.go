@@ -42,7 +42,8 @@ type Handler interface {
 	DeleteCloudPhoto(ctx context.Context, params DeleteCloudPhotoParams) (DeleteCloudPhotoRes, error)
 	// GetAnimal implements getAnimal operation.
 	//
-	// コレクションの動物詳細を取得.
+	// 指定した animalId の動物詳細を取得する。
+	// バトル前に対戦相手を表示するため、ログインユーザー以外の動物も取得できる。.
 	//
 	// GET /animals/{animalId}
 	GetAnimal(ctx context.Context, params GetAnimalParams) (GetAnimalRes, error)

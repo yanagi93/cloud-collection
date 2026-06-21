@@ -28,6 +28,10 @@ func (r *AnimalRepository) GetByID(ctx context.Context, id, userID uuid.UUID) (d
 	})
 }
 
+func (r *AnimalRepository) GetByIDAnyUser(ctx context.Context, id uuid.UUID) (dbgen.Animal, error) {
+	return r.queries.GetAnimalByIDAnyUser(ctx, id)
+}
+
 func (r *AnimalRepository) GetByPhotoID(ctx context.Context, photoID, userID uuid.UUID) (dbgen.Animal, error) {
 	return r.queries.GetAnimalByPhotoID(ctx, dbgen.GetAnimalByPhotoIDParams{
 		PhotoID: photoID,

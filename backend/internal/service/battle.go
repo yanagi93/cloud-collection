@@ -17,6 +17,7 @@ const maxBattleTurns = 10000
 
 type battleAnimalGetter interface {
 	Get(ctx context.Context, userID, animalID uuid.UUID) (dbgen.Animal, error)
+	GetAny(ctx context.Context, animalID uuid.UUID) (dbgen.Animal, error)
 }
 
 type BattleService struct {
@@ -86,7 +87,7 @@ func (s *BattleService) Create(ctx context.Context, input CreateBattleInput) (Ba
 		return BattleResult{}, err
 	}
 
-	defender, err := s.animals.Get(ctx, input.UserID, input.DefenderID)
+	defender, err := s.animals.GetAny(ctx, input.DefenderID)
 	if errors.Is(err, ErrAnimalNotFound) {
 		return BattleResult{}, ErrBattleNotFound
 	}

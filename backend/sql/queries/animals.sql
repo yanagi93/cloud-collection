@@ -52,6 +52,11 @@ FROM animals
 WHERE id = $1
   AND user_id = $2;
 
+-- name: GetAnimalByIDAnyUser :one
+SELECT *
+FROM animals
+WHERE id = $1;
+
 -- name: GetAnimalByPhotoID :one
 SELECT *
 FROM animals
