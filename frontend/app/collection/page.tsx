@@ -6,11 +6,27 @@ import Link from "next/link";
 import { Card, Button } from "pixel-retroui";
 import AuthGuard from "@/component/AuthGuard";
 
+type CloudAnimal = {
+  id: string;
+  name: string;
+  species?: string;
+  hp?: number;
+  attack?: number;
+  evasion?: number;
+  defense?: number;
+  original_image_url?: string;
+  composite_image_url?: string;
+};
+
+type AnimalListResponse = {
+  items?: CloudAnimal[];
+};
+
 export default function CollectionPage() {
   const router = useRouter();
 
   const [cloudAnimals, setCloudAnimals] =
-    useState<any[]>([]);
+    useState<CloudAnimal[]>([]);
 
   useEffect(() => {
     const fetchAnimals = async () => {
@@ -43,7 +59,7 @@ export default function CollectionPage() {
           throw new Error("取得失敗");
         }
 
-        const data = await res.json();
+        const data = (await res.json()) as AnimalListResponse;
 
         console.log("/animals", data);
 
@@ -59,11 +75,17 @@ export default function CollectionPage() {
     fetchAnimals();
   }, [router]);
 
-  const getRarity = (hp: number) => {
-    if (hp >= 90) return 5;
-    if (hp >= 75) return 4;
-    if (hp >= 60) return 3;
-    if (hp >= 40) return 2;
+  const getRarity = (cloud: CloudAnimal) => {
+    const total =
+      (cloud.hp ?? 0) +
+      (cloud.attack ?? 0) +
+      (cloud.evasion ?? 0) +
+      (cloud.defense ?? 0);
+
+    if (total >= 250) return 5;
+    if (total >= 220) return 4;
+    if (total >= 180) return 3;
+    if (total >= 140) return 2;
     return 1;
   };
 
@@ -137,7 +159,7 @@ export default function CollectionPage() {
       {/* 図鑑一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto z-20">
         {cloudAnimals.map((cloud) => {
-          const rarity = getRarity(cloud.hp ?? 0);
+          const rarity = getRarity(cloud);
 
           return (
             <Link
