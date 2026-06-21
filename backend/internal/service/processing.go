@@ -307,7 +307,7 @@ func (p *NanoBananaProcessor) generate(ctx context.Context, input ImageProcessin
 	return decoded, nil
 }
 
-const compositePrompt = `与えられた雲の画像から動物を連想して、黒のマーカーで動物に見えるように綺麗に加筆してください。雲の一部だけを使っても構わない。雲自体の形を変えることは絶対にしてはならない。`
+const compositePrompt = `この与えられた画像の雲のシルエットから、連想できる生物を一匹好きに選んで、落書きをしてください。雲の一部だけを使ってもいいです。雲自体の形を変えることは絶対にしないでください。書くのはパーツだけでいいです。黒で書いてください。`
 
 const metadataPrompt = `Analyze this edited cloud photo after black marker doodle lines were added.
 Infer what animal the final doodle and cloud silhouette depict.
