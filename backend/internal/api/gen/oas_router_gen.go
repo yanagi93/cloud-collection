@@ -601,7 +601,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								return r, true
 							case "GET":
 								r.name = GetAnimalOperation
-								r.summary = "コレクションの動物詳細を取得"
+								r.summary = "動物詳細を取得"
 								r.operationID = "getAnimal"
 								r.operationGroup = ""
 								r.pathPattern = "/animals/{animalId}"

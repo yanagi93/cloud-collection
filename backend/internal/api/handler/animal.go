@@ -90,12 +90,12 @@ func (h *Handler) CreateAnimal(ctx context.Context, req *gen.CreateAnimalRequest
 }
 
 func (h *Handler) GetAnimal(ctx context.Context, params gen.GetAnimalParams) (gen.GetAnimalRes, error) {
-	userID, ok := middleware.CurrentUserID(ctx)
+	_, ok := middleware.CurrentUserID(ctx)
 	if !ok {
 		return getAnimalUnauthorized(), nil
 	}
 
-	animal, err := h.animals.Get(ctx, userID, params.AnimalId)
+	animal, err := h.animals.GetAny(ctx, params.AnimalId)
 	if errors.Is(err, service.ErrAnimalNotFound) {
 		return getAnimalNotFound(), nil
 	}

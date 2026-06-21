@@ -23,6 +23,7 @@ type Querier interface {
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	FailProcessingJob(ctx context.Context, arg FailProcessingJobParams) (ProcessingJob, error)
 	GetAnimalByID(ctx context.Context, arg GetAnimalByIDParams) (Animal, error)
+	GetAnimalByIDAnyUser(ctx context.Context, id uuid.UUID) (Animal, error)
 	GetAnimalByPhotoID(ctx context.Context, arg GetAnimalByPhotoIDParams) (Animal, error)
 	GetCloudPhotoByID(ctx context.Context, arg GetCloudPhotoByIDParams) (CloudPhoto, error)
 	GetCloudPhotoDetailByID(ctx context.Context, arg GetCloudPhotoDetailByIDParams) (GetCloudPhotoDetailByIDRow, error)

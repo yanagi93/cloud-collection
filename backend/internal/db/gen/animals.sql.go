@@ -189,6 +189,39 @@ func (q *Queries) GetAnimalByID(ctx context.Context, arg GetAnimalByIDParams) (A
 	return i, err
 }
 
+const getAnimalByIDAnyUser = `-- name: GetAnimalByIDAnyUser :one
+SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
+FROM animals
+WHERE id = $1
+`
+
+func (q *Queries) GetAnimalByIDAnyUser(ctx context.Context, id uuid.UUID) (Animal, error) {
+	row := q.db.QueryRow(ctx, getAnimalByIDAnyUser, id)
+	var i Animal
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.PhotoID,
+		&i.ProcessingJobID,
+		&i.Name,
+		&i.Species,
+		&i.OriginalImageUrl,
+		&i.CompositeImageUrl,
+		&i.Confidence,
+		&i.Description,
+		&i.Hp,
+		&i.Attack,
+		&i.Evasion,
+		&i.Defense,
+		&i.CapturedAt,
+		&i.Latitude,
+		&i.Longitude,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getAnimalByPhotoID = `-- name: GetAnimalByPhotoID :one
 SELECT id, user_id, photo_id, processing_job_id, name, species, original_image_url, composite_image_url, confidence, description, hp, attack, evasion, defense, captured_at, latitude, longitude, created_at, updated_at
 FROM animals

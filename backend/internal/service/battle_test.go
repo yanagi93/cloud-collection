@@ -16,7 +16,6 @@ func TestBattleServiceCreateChallengerWins(t *testing.T) {
 	defenderID := uuid.New()
 
 	service := NewBattleService(fakeBattleAnimals{
-		userID: userID,
 		animals: map[uuid.UUID]dbgen.Animal{
 			challengerID: battleAnimal(challengerID, userID, 20, 10, 0, 2),
 			defenderID:   battleAnimal(defenderID, userID, 12, 6, 0, 4),
@@ -56,7 +55,6 @@ func TestBattleServiceCreateUsesDefenderEvasionAsDodgeRate(t *testing.T) {
 	defenderID := uuid.New()
 
 	service := NewBattleService(fakeBattleAnimals{
-		userID: userID,
 		animals: map[uuid.UUID]dbgen.Animal{
 			challengerID: battleAnimal(challengerID, userID, 10, 20, 0, 0),
 			defenderID:   battleAnimal(defenderID, userID, 10, 1, 100, 0),
@@ -75,6 +73,34 @@ func TestBattleServiceCreateUsesDefenderEvasionAsDodgeRate(t *testing.T) {
 
 	if result.BattleLog[0].Actions[0].Hit {
 		t.Fatal("challenger attack hit despite defender evasion 100")
+	}
+}
+
+func TestBattleServiceCreateAllowsDefenderOwnedByOtherUser(t *testing.T) {
+	userID := uuid.New()
+	otherUserID := uuid.New()
+	challengerID := uuid.New()
+	defenderID := uuid.New()
+
+	service := NewBattleService(fakeBattleAnimals{
+		animals: map[uuid.UUID]dbgen.Animal{
+			challengerID: battleAnimal(challengerID, userID, 20, 10, 0, 2),
+			defenderID:   battleAnimal(defenderID, otherUserID, 12, 6, 0, 4),
+		},
+	})
+	service.randomInt = func(int) int { return 0 }
+
+	result, err := service.Create(context.Background(), CreateBattleInput{
+		UserID:       userID,
+		ChallengerID: challengerID,
+		DefenderID:   defenderID,
+	})
+	if err != nil {
+		t.Fatalf("Create() error = %v", err)
+	}
+
+	if result.InitialStatus.Defender.HP != 12 {
+		t.Fatalf("InitialStatus.Defender.HP = %d", result.InitialStatus.Defender.HP)
 	}
 }
 
@@ -99,7 +125,6 @@ func TestBattleServiceCreateRejectsBattleWithoutPossibleDamage(t *testing.T) {
 	defenderID := uuid.New()
 
 	service := NewBattleService(fakeBattleAnimals{
-		userID: userID,
 		animals: map[uuid.UUID]dbgen.Animal{
 			challengerID: battleAnimal(challengerID, userID, 10, 1, 0, 10),
 			defenderID:   battleAnimal(defenderID, userID, 10, 1, 0, 10),
@@ -117,14 +142,18 @@ func TestBattleServiceCreateRejectsBattleWithoutPossibleDamage(t *testing.T) {
 }
 
 type fakeBattleAnimals struct {
-	userID  uuid.UUID
 	animals map[uuid.UUID]dbgen.Animal
 }
 
 func (f fakeBattleAnimals) Get(_ context.Context, userID, animalID uuid.UUID) (dbgen.Animal, error) {
-	if userID != f.userID {
+	animal, ok := f.animals[animalID]
+	if !ok || animal.UserID != userID {
 		return dbgen.Animal{}, ErrAnimalNotFound
 	}
+	return animal, nil
+}
+
+func (f fakeBattleAnimals) GetAny(_ context.Context, animalID uuid.UUID) (dbgen.Animal, error) {
 	animal, ok := f.animals[animalID]
 	if !ok {
 		return dbgen.Animal{}, ErrAnimalNotFound

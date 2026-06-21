@@ -257,7 +257,7 @@ export default function CloudGlobe({ photos }: Props) {
                             type="button"
                             onClick={() =>
                                 router.push(
-                                    `/battle?enemyPhotoId=${selectedPhoto.id}`
+                                    `/battle?defenderId=${selectedPhoto.id}`
                                 )
                             }
                             className="w-1/2 rounded border-2 border-black bg-sky-200 px-4 py-2 text-sm font-bold shadow-[3px_3px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"

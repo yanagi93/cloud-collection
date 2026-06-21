@@ -127,6 +127,14 @@ func (s *AnimalService) Get(ctx context.Context, userID, animalID uuid.UUID) (db
 	return animal, err
 }
 
+func (s *AnimalService) GetAny(ctx context.Context, animalID uuid.UUID) (dbgen.Animal, error) {
+	animal, err := s.animals.GetByIDAnyUser(ctx, animalID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return dbgen.Animal{}, ErrAnimalNotFound
+	}
+	return animal, err
+}
+
 func (s *AnimalService) List(ctx context.Context, userID uuid.UUID, page, pageSize int, sort AnimalSort, q string) (AnimalListResult, error) {
 	if page < 1 || pageSize < 1 || pageSize > 100 {
 		return AnimalListResult{}, ErrInvalidAnimalRequest

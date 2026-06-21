@@ -348,7 +348,10 @@ paths:
     get:
       tags: [Animals]
       operationId: getAnimal
-      summary: コレクションの動物詳細を取得
+      summary: 動物詳細を取得
+      description: |
+        指定した animalId の動物詳細を取得する。
+        バトル前に対戦相手を表示するため、ログインユーザー以外の動物も取得できる。
       security:
         - bearerAuth: []
       responses:

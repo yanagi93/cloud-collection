@@ -791,7 +791,8 @@ func (s *Server) handleDeleteCloudPhotoRequest(args [1]string, argsEscaped bool,
 
 // handleGetAnimalRequest handles getAnimal operation.
 //
-// コレクションの動物詳細を取得.
+// 指定した animalId の動物詳細を取得する。
+// バトル前に対戦相手を表示するため、ログインユーザー以外の動物も取得できる。.
 //
 // GET /animals/{animalId}
 func (s *Server) handleGetAnimalRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -927,7 +928,7 @@ func (s *Server) handleGetAnimalRequest(args [1]string, argsEscaped bool, w http
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    GetAnimalOperation,
-			OperationSummary: "コレクションの動物詳細を取得",
+			OperationSummary: "動物詳細を取得",
 			OperationID:      "getAnimal",
 			Body:             nil,
 			RawBody:          rawBody,
