@@ -29,7 +29,7 @@ export default function Home() {
         </h1>
 
         <p className="text-gray-600 mb-8">
-          雲を集めて育てるRPG
+          雲を集めて戦うターンバトル
         </p>
 
         {/* ボタンエリア */}

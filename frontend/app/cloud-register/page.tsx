@@ -193,14 +193,6 @@ export default function CloudRegisterPage() {
                                 <StatusBox label="防御" value={stats.defense} />
                             </div>
 
-                            <Button
-                                onClick={() => setStats(createRandomStats())}
-                                disabled={isRegistering}
-                                className="mt-5 h-12 w-full bg-white text-black font-bold"
-                            >
-                                パラメータを振り直す
-                            </Button>
-
                             {message ? (
                                 <div className="mt-4 border-2 border-black bg-red-50 p-3 text-sm font-bold text-red-700">
                                     {message}
