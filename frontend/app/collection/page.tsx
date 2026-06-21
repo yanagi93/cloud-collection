@@ -22,15 +22,57 @@ type AnimalListResponse = {
   items?: CloudAnimal[];
 };
 
+const IMAGE_BASE_URL =
+  (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080").replace(
+    /\/$/,
+    ""
+  );
+
+function toImageUrl(url?: string | null): string {
+  if (!url) return "";
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  if (url.startsWith("/")) {
+    return `${IMAGE_BASE_URL}${url}`;
+  }
+
+  return `${IMAGE_BASE_URL}/${url}`;
+}
+
+function getStatusTotal(cloud: CloudAnimal) {
+  return (
+    (cloud.hp ?? 0) +
+    (cloud.attack ?? 0) +
+    (cloud.evasion ?? 0) +
+    (cloud.defense ?? 0)
+  );
+}
+
+function getRarityByStatusTotal(total: number) {
+  if (total >= 250) return 5;
+  if (total >= 220) return 4;
+  if (total >= 180) return 3;
+  if (total >= 140) return 2;
+  return 1;
+}
+
 export default function CollectionPage() {
   const router = useRouter();
 
   const [cloudAnimals, setCloudAnimals] =
     useState<CloudAnimal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAnimals = async () => {
       try {
+        setIsLoading(true);
+        setErrorMessage(null);
+
         const token =
           localStorage.getItem("accessToken");
 
@@ -41,14 +83,12 @@ export default function CollectionPage() {
           return;
         }
 
-        const res = await fetch(
-          "http://localhost:8080/animals",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetch("/api/animals?page=1&page_size=100&sort=created_at_desc", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
 
         console.log(
           "/animals status",
@@ -69,6 +109,9 @@ export default function CollectionPage() {
           "ANIMALS ERROR",
           error
         );
+        setErrorMessage("図鑑の取得に失敗しました");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -76,17 +119,7 @@ export default function CollectionPage() {
   }, [router]);
 
   const getRarity = (cloud: CloudAnimal) => {
-    const total =
-      (cloud.hp ?? 0) +
-      (cloud.attack ?? 0) +
-      (cloud.evasion ?? 0) +
-      (cloud.defense ?? 0);
-
-    if (total >= 250) return 5;
-    if (total >= 220) return 4;
-    if (total >= 180) return 3;
-    if (total >= 140) return 2;
-    return 1;
+    return getRarityByStatusTotal(getStatusTotal(cloud));
   };
 
   const rarityLabel = {
@@ -158,8 +191,24 @@ export default function CollectionPage() {
 
       {/* 図鑑一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto z-20">
+        {isLoading && (
+          <Card className="p-4 text-center font-bold z-20">
+            読み込み中...
+          </Card>
+        )}
+
+        {errorMessage && (
+          <Card className="p-4 text-center font-bold text-red-600 z-20">
+            {errorMessage}
+          </Card>
+        )}
+
         {cloudAnimals.map((cloud) => {
           const rarity = getRarity(cloud);
+          const statusTotal = getStatusTotal(cloud);
+          const imageUrl = toImageUrl(
+            cloud.composite_image_url ?? cloud.original_image_url
+          );
 
           return (
             <Link
@@ -190,10 +239,7 @@ export default function CollectionPage() {
                 `}
               >
                 <img
-                  src={
-                    cloud.composite_image_url ??
-                    cloud.original_image_url
-                  }
+                  src={imageUrl}
                   alt={cloud.name}
                   className="w-full h-48 object-cover rounded mb-4 z-20"
                 />
@@ -229,7 +275,7 @@ export default function CollectionPage() {
                 </p>
 
                 <div className="mt-3 text-center text-xs text-gray-600">
-                  HP: {cloud.hp}
+                  雲値合計: {statusTotal}
                 </div>
               </Card>
             </Link>

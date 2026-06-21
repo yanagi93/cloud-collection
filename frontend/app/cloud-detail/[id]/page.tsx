@@ -359,7 +359,7 @@ export default function CloudDetailPage() {
             <p className="font-bold mt-2 text-lg">{rarityInfo.label}</p>
 
             <p className="mt-1 text-sm text-gray-600">
-              個体値合計: {statusTotal}
+              雲値合計: {statusTotal}
             </p>
 
             {rarity === 5 && (
