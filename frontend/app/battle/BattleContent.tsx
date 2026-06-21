@@ -71,11 +71,11 @@ function progress(current: number, max: number) {
     return Math.max(0, Math.min(100, (current / max) * 100));
 }
 
-function remainingHp(result: BattleResult) {
+function remainingHp(result: BattleResult, visibleLogCount: number) {
     let challenger = result.initial_status.challenger.hp;
     let defender = result.initial_status.defender.hp;
 
-    for (const log of result.battle_log) {
+    for (const log of result.battle_log.slice(0, visibleLogCount)) {
         for (const action of log.actions) {
             if (action.type !== "attack" || action.hit === false) continue;
 
@@ -175,6 +175,7 @@ export default function BattleContent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [battleResult, setBattleResult] = useState<BattleResult | null>(null);
+    const [visibleLogCount, setVisibleLogCount] = useState(0);
 
     const selectedAnimal = animals[selectedIndex] ?? null;
     const enemyImageUrl = useMemo(() => animalImageUrl(enemy), [enemy]);
@@ -203,6 +204,7 @@ export default function BattleContent() {
                 setIsLoading(true);
                 setErrorMessage(null);
                 setBattleResult(null);
+                setVisibleLogCount(0);
 
                 try {
                     const headers = { Authorization: `Bearer ${token}` };
@@ -277,6 +279,7 @@ export default function BattleContent() {
             return (current + direction + animals.length) % animals.length;
         });
         setBattleResult(null);
+        setVisibleLogCount(0);
         setErrorMessage(null);
     };
 
@@ -292,6 +295,7 @@ export default function BattleContent() {
         setIsSubmitting(true);
         setErrorMessage(null);
         setBattleResult(null);
+        setVisibleLogCount(0);
 
         try {
             const response = await fetch("/api/battles", {
@@ -315,6 +319,7 @@ export default function BattleContent() {
             }
 
             setBattleResult(data);
+            setVisibleLogCount(0);
         } catch (error) {
             console.error("battle request error:", error);
             setErrorMessage(
@@ -327,7 +332,22 @@ export default function BattleContent() {
         }
     };
 
-    const finalHp = battleResult ? remainingHp(battleResult) : null;
+    const displayedLogs = battleResult
+        ? battleResult.battle_log.slice(0, visibleLogCount)
+        : [];
+    const currentHp = battleResult
+        ? remainingHp(battleResult, visibleLogCount)
+        : null;
+    const battleFinished =
+        battleResult !== null && visibleLogCount >= battleResult.battle_log.length;
+    const canAdvanceBattle =
+        battleResult !== null && visibleLogCount < battleResult.battle_log.length;
+    const nextBattleStep = () => {
+        if (!battleResult) return;
+        setVisibleLogCount((current) =>
+            Math.min(current + 1, battleResult.battle_log.length)
+        );
+    };
 
     return (
         <AuthGuard>
@@ -408,20 +428,26 @@ export default function BattleContent() {
                             </Button>
                         </div>
 
-                        {battleResult && finalHp ? (
+                        {battleResult && currentHp ? (
                             <section className="mt-8">
                                 <Card className="p-5">
-                                    <p
-                                        className={`mb-5 text-center text-2xl font-bold ${
-                                            battleResult.winner === "challenger"
-                                                ? "text-green-700"
-                                                : "text-red-700"
-                                        }`}
-                                    >
-                                        {battleResult.winner === "challenger"
-                                            ? "勝利"
-                                            : "敗北"}
-                                    </p>
+                                    {battleFinished ? (
+                                        <p
+                                            className={`mb-5 text-center text-2xl font-bold ${
+                                                battleResult.winner === "challenger"
+                                                    ? "text-green-700"
+                                                    : "text-red-700"
+                                            }`}
+                                        >
+                                            {battleResult.winner === "challenger"
+                                                ? "勝利"
+                                                : "敗北"}
+                                        </p>
+                                    ) : (
+                                        <p className="mb-5 text-center text-lg font-bold">
+                                            バトル進行中
+                                        </p>
+                                    )}
 
                                     <div className="grid gap-5 md:grid-cols-2">
                                         <div>
@@ -430,7 +456,7 @@ export default function BattleContent() {
                                             </p>
                                             <ProgressBar
                                                 progress={progress(
-                                                    finalHp.challenger,
+                                                    currentHp.challenger,
                                                     battleResult.initial_status
                                                         .challenger.hp
                                                 )}
@@ -438,7 +464,7 @@ export default function BattleContent() {
                                                 borderColor="black"
                                             />
                                             <p className="mt-1 text-center text-sm font-bold">
-                                                HP {finalHp.challenger} /{" "}
+                                                HP {currentHp.challenger} /{" "}
                                                 {
                                                     battleResult.initial_status
                                                         .challenger.hp
@@ -452,7 +478,7 @@ export default function BattleContent() {
                                             </p>
                                             <ProgressBar
                                                 progress={progress(
-                                                    finalHp.defender,
+                                                    currentHp.defender,
                                                     battleResult.initial_status
                                                         .defender.hp
                                                 )}
@@ -460,7 +486,7 @@ export default function BattleContent() {
                                                 borderColor="black"
                                             />
                                             <p className="mt-1 text-center text-sm font-bold">
-                                                HP {finalHp.defender} /{" "}
+                                                HP {currentHp.defender} /{" "}
                                                 {
                                                     battleResult.initial_status
                                                         .defender.hp
@@ -468,6 +494,25 @@ export default function BattleContent() {
                                             </p>
                                         </div>
                                     </div>
+
+                                    {canAdvanceBattle ? (
+                                        <div className="mt-5 text-center">
+                                            <Button
+                                                bg="#f59e0b"
+                                                onClick={nextBattleStep}
+                                            >
+                                                次の攻撃
+                                            </Button>
+                                        </div>
+                                    ) : null}
+
+                                    {battleFinished ? (
+                                        <div className="mt-5 text-center">
+                                            <Button onClick={() => router.push("/home")}>
+                                                ホームへ戻る
+                                            </Button>
+                                        </div>
+                                    ) : null}
                                 </Card>
 
                                 <Card className="mt-5 max-h-80 overflow-y-auto p-4">
@@ -475,8 +520,10 @@ export default function BattleContent() {
                                         バトルログ
                                     </h2>
                                     <div className="space-y-2 text-sm">
-                                        {battleResult.battle_log.map(
-                                            (log, logIndex) =>
+                                        {displayedLogs.length === 0 ? (
+                                            <p>次の攻撃を押すとバトルが進みます</p>
+                                        ) : (
+                                            displayedLogs.map((log, logIndex) =>
                                                 log.actions.map(
                                                     (action, actionIndex) => (
                                                         <p
@@ -491,6 +538,7 @@ export default function BattleContent() {
                                                         </p>
                                                     )
                                                 )
+                                            )
                                         )}
                                     </div>
                                 </Card>
